@@ -105,25 +105,36 @@ export default function RecordsScreen() {
     );
   };
 
-  const renderItem = ({ item }: { item: LessonRecord }) => (
-    <View className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 mb-2 shadow-sm border border-green-100">
+  const renderItem = ({ item }: { item: LessonRecord }) => {
+    const isAbsent = !item.confirmed_by;
+    
+    return (
+    <View className={`rounded-xl p-3 mb-2 shadow-sm border ${isAbsent ? 'bg-gray-50 border-gray-200' : 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-100'}`}>
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center flex-1">
-          <View className="bg-gradient-to-br from-green-400 to-emerald-500 p-2 rounded-lg mr-2.5">
-            <FontAwesome6 name="circle-check" size={16} color="white" />
+          <View className={`p-2 rounded-lg mr-2.5 ${isAbsent ? 'bg-gray-200' : 'bg-gradient-to-br from-green-400 to-emerald-500'}`}>
+            <FontAwesome6 name={isAbsent ? "circle-xmark" : "circle-check"} size={16} color="white" />
           </View>
           <View className="flex-1">
             <View className="flex-row items-center flex-wrap gap-1.5">
-              <Text className="text-sm font-bold text-gray-800">{item.lesson_date}</Text>
-              {getConfirmBadge(item.confirmed_by)}
+              <Text className={`text-sm font-bold ${isAbsent ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
+                {item.lesson_date}
+              </Text>
+              {isAbsent ? (
+                <View className="bg-gray-200 px-1.5 py-0.5 rounded">
+                  <Text className="text-gray-500 text-xs">{language === 'zh' ? '未上课' : 'Absent'}</Text>
+                </View>
+              ) : (
+                getConfirmBadge(item.confirmed_by)
+              )}
             </View>
             <Text className="text-xs text-gray-500 mt-0.5 flex-row items-center">
               <FontAwesome6 name="user-tie" size={10} color="#9ca3af" /> {language === 'zh' ? '教练' : 'Coach'}: {getTeacherName(item.teacher_id)}
             </Text>
           </View>
         </View>
-        <View className="bg-gradient-to-r from-green-400 to-emerald-500 px-2.5 py-1 rounded-lg">
-          <Text className="text-white font-bold text-xs">
+        <View className={`px-2.5 py-1 rounded-lg ${isAbsent ? 'bg-gray-200' : 'bg-gradient-to-r from-green-400 to-emerald-500'}`}>
+          <Text className={`font-bold text-xs ${isAbsent ? 'text-gray-400 line-through' : 'text-white'}`}>
             {item.duration} {language === 'zh' ? '课时' : 'less'}
           </Text>
         </View>
@@ -133,6 +144,7 @@ export default function RecordsScreen() {
       )}
     </View>
   );
+  };
 
   return (
     <Screen>
