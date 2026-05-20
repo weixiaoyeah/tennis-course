@@ -101,29 +101,31 @@ export default function TeachersScreen() {
   };
 
   const renderItem = ({ item }: { item: Teacher }) => (
-    <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 shadow-sm">
+    <View className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 mb-3 shadow-md border border-orange-100">
       <View className="flex-row items-center">
-        <View className="w-12 h-12 bg-accent/10 rounded-full items-center justify-center">
-          <FontAwesome6 name="user-tie" size={24} color="#4F46E5" />
+        <View className="w-14 h-14 bg-gradient-to-br from-orange-400 to-amber-400 rounded-2xl items-center justify-center shadow-md">
+          <FontAwesome6 name="user-tie" size={24} color="white" />
         </View>
         <View className="flex-1 ml-3">
-          <Text className="text-base font-medium text-foreground">{item.name}</Text>
+          <Text className="text-lg font-bold text-gray-800">{item.name}</Text>
           {item.phone && (
-            <Text className="text-sm text-muted mt-1">{item.phone}</Text>
+            <Text className="text-sm text-gray-500 mt-1 flex-row items-center">
+              <FontAwesome6 name="phone" size={12} color="#9ca3af" /> {item.phone}
+            </Text>
           )}
           {item.remark && (
-            <Text className="text-sm text-muted mt-1" numberOfLines={2}>{item.remark}</Text>
+            <Text className="text-sm text-gray-400 mt-1" numberOfLines={2}>{item.remark}</Text>
           )}
         </View>
         <View className="flex-row">
           <TouchableOpacity 
-            className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-full items-center justify-center mr-2"
+            className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center mr-2 shadow-sm"
             onPress={() => handleEdit(item)}
           >
             <FontAwesome6 name="pencil" size={16} color="#3B82F6" />
           </TouchableOpacity>
           <TouchableOpacity 
-            className="w-10 h-10 bg-red-100 dark:bg-red-900/30 rounded-full items-center justify-center"
+            className="w-10 h-10 bg-red-100 rounded-xl items-center justify-center shadow-sm"
             onPress={() => handleDelete(item)}
           >
             <FontAwesome6 name="trash" size={16} color="#EF4444" />
@@ -138,26 +140,31 @@ export default function TeachersScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-foreground">{t('teachers.title')}</Text>
-            <Text className="text-sm text-muted mt-1">
-              {language === 'zh' ? '管理网球教练信息' : 'Manage tennis coach info'}
-            </Text>
+          <View className="flex-row items-center">
+            <View className="bg-gradient-to-br from-orange-400 to-amber-400 p-2.5 rounded-xl mr-3">
+              <FontAwesome6 name="user-tie" size={22} color="white" />
+            </View>
+            <View>
+              <Text className="text-2xl font-bold text-gray-800">{t('teachers.title')}</Text>
+              <Text className="text-sm text-orange-500 mt-0.5">
+                {language === 'zh' ? '管理网球教练信息' : 'Manage tennis coach info'}
+              </Text>
+            </View>
           </View>
           <View className="flex-row items-center gap-2">
             <TouchableOpacity 
               onPress={toggleLanguage}
-              className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full mr-2"
+              className="bg-gradient-to-r from-orange-400 to-amber-400 px-4 py-2 rounded-full shadow-md"
             >
-              <Text className="text-foreground text-sm font-medium">
+              <Text className="text-white text-sm font-semibold">
                 {language === 'zh' ? 'EN' : '中'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              className="bg-accent px-4 py-2 rounded-full"
+              className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 rounded-full shadow-lg"
               onPress={handleAdd}
             >
-              <Text className="text-white font-medium">+ {t('buttons.add')}</Text>
+              <Text className="text-white font-bold">+ {t('buttons.add')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -174,8 +181,11 @@ export default function TeachersScreen() {
           ListEmptyComponent={
             loading ? null : (
               <View className="items-center pt-20">
-                <Text className="text-muted">{t('teachers.noTeachers')}</Text>
-                <Text className="text-sm text-muted mt-1">
+                <View className="bg-orange-100 p-4 rounded-full mb-3">
+                  <FontAwesome6 name="user-tie" size={32} color="#f97316" />
+                </View>
+                <Text className="text-gray-600 font-medium">{t('teachers.noTeachers')}</Text>
+                <Text className="text-sm text-gray-400 mt-1">
                   {language === 'zh' ? '点击右上角添加教练' : 'Tap top right to add teacher'}
                 </Text>
               </View>
@@ -195,21 +205,23 @@ export default function TeachersScreen() {
             <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
               <View className="flex-1" />
             </TouchableWithoutFeedback>
-            <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6">
+            <View className="bg-gradient-to-t from-white to-orange-50 rounded-t-3xl p-6 shadow-2xl">
               <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-xl font-bold text-foreground">
+                <Text className="text-xl font-bold text-gray-800">
                   {editingTeacher ? t('teachers.editTeacher') : t('teachers.addTeacher')}
                 </Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Text className="text-2xl text-muted">×</Text>
+                  <View className="bg-gray-100 w-8 h-8 rounded-full items-center justify-center">
+                    <Text className="text-gray-500 text-xl">×</Text>
+                  </View>
                 </TouchableOpacity>
               </View>
 
               <View className="space-y-4">
                 <View>
-                  <Text className="text-sm font-medium text-foreground mb-2">{t('teachers.name')} *</Text>
+                  <Text className="text-sm font-semibold text-gray-700 mb-2">{t('teachers.name')} *</Text>
                   <TextInput
-                    className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
+                    className="bg-white border-2 border-orange-100 rounded-xl px-4 py-3 text-gray-800 shadow-sm"
                     placeholder={t('teachers.placeholder.name')}
                     placeholderTextColor="#9CA3AF"
                     value={formData.name}
@@ -218,9 +230,9 @@ export default function TeachersScreen() {
                 </View>
 
                 <View>
-                  <Text className="text-sm font-medium text-foreground mb-2">{t('teachers.phone')}</Text>
+                  <Text className="text-sm font-semibold text-gray-700 mb-2">{t('teachers.phone')}</Text>
                   <TextInput
-                    className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
+                    className="bg-white border-2 border-orange-100 rounded-xl px-4 py-3 text-gray-800 shadow-sm"
                     placeholder={t('teachers.placeholder.phone')}
                     placeholderTextColor="#9CA3AF"
                     keyboardType="phone-pad"
@@ -230,11 +242,9 @@ export default function TeachersScreen() {
                 </View>
 
                 <View>
-                  <Text className="text-sm font-medium text-foreground mb-2">{t('teachers.remark')}</Text>
+                  <Text className="text-sm font-semibold text-gray-700 mb-2">{t('teachers.remark')}</Text>
                   <TextInput
-                    className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                    placeholder={t('teachers.placeholder.remark')}
-                    placeholderTextColor="#9CA3AF"
+                    className="bg-white border-2 border-orange-100 rounded-xl px-4 py-3 text-gray-800 shadow-sm"
                     multiline
                     numberOfLines={3}
                     value={formData.remark}

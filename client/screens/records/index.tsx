@@ -57,30 +57,30 @@ export default function RecordsScreen() {
   };
 
   const renderItem = ({ item }: { item: LessonRecord }) => (
-    <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 shadow-sm">
+    <View className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-4 mb-3 shadow-md border border-green-100">
       <View className="flex-row items-start justify-between">
-        <View className="flex-row items-center">
-          <View className="bg-accent/10 p-2 rounded-xl mr-3">
-            <FontAwesome6 name="circle-check" size={20} color="#4F46E5" />
+        <View className="flex-row items-center flex-1">
+          <View className="bg-gradient-to-br from-green-400 to-emerald-500 p-2.5 rounded-xl mr-3 shadow-md">
+            <FontAwesome6 name="circle-check" size={20} color="white" />
           </View>
-          <View>
-            <Text className="text-base font-medium text-foreground">{item.lesson_date}</Text>
-            <Text className="text-sm text-muted mt-1">
-              {language === 'zh' ? '教练' : 'Coach'}: {getTeacherName(item.teacher_id)}
+          <View className="flex-1">
+            <Text className="text-base font-bold text-gray-800">{item.lesson_date}</Text>
+            <Text className="text-sm text-gray-500 mt-1 flex-row items-center">
+              <FontAwesome6 name="user-tie" size={12} color="#9ca3af" /> {language === 'zh' ? '教练' : 'Coach'}: {getTeacherName(item.teacher_id)}
             </Text>
           </View>
         </View>
         <View className="items-end">
-          <View className="bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full">
-            <Text className="text-green-600 dark:text-green-400 font-medium text-sm">
+          <View className="bg-gradient-to-r from-green-400 to-emerald-500 px-3 py-1.5 rounded-full shadow-sm">
+            <Text className="text-white font-bold text-sm">
               {item.duration} {language === 'zh' ? '课时' : 'lessons'}
             </Text>
           </View>
         </View>
       </View>
       {item.remark && (
-        <View className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <Text className="text-sm text-muted">{item.remark}</Text>
+        <View className="mt-3 pt-3 border-t border-green-100">
+          <Text className="text-sm text-gray-500 bg-white/50 px-3 py-2 rounded-xl">{item.remark}</Text>
         </View>
       )}
     </View>
@@ -91,17 +91,22 @@ export default function RecordsScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-foreground">{t('records.title')}</Text>
-            <Text className="text-sm text-muted mt-1">
-              {language === 'zh' ? '已完成的上课记录' : 'Completed lesson records'}
-            </Text>
+          <View className="flex-row items-center">
+            <View className="bg-gradient-to-br from-green-400 to-emerald-500 p-2.5 rounded-xl mr-3">
+              <FontAwesome6 name="clipboard-list" size={22} color="white" />
+            </View>
+            <View>
+              <Text className="text-2xl font-bold text-gray-800">{t('records.title')}</Text>
+              <Text className="text-sm text-green-500 mt-0.5">
+                {language === 'zh' ? '已完成的上课记录' : 'Completed lesson records'}
+              </Text>
+            </View>
           </View>
           <TouchableOpacity 
             onPress={toggleLanguage}
-            className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full"
+            className="bg-gradient-to-r from-green-400 to-emerald-500 px-4 py-2 rounded-full shadow-md"
           >
-            <Text className="text-foreground text-sm font-medium">
+            <Text className="text-white text-sm font-semibold">
               {language === 'zh' ? 'EN' : '中'}
             </Text>
           </TouchableOpacity>
@@ -118,8 +123,10 @@ export default function RecordsScreen() {
           }
           ListEmptyComponent={
             <View className="items-center justify-center py-20">
-              <FontAwesome6 name="clipboard-list" size={48} color="#D1D5DB" />
-              <Text className="text-muted mt-4">{language === 'zh' ? '暂无上课记录' : 'No records'}</Text>
+              <View className="bg-green-100 p-4 rounded-full mb-3">
+                <FontAwesome6 name="clipboard-list" size={32} color="#22c55e" />
+              </View>
+              <Text className="text-gray-600 font-medium">{language === 'zh' ? '暂无上课记录' : 'No records'}</Text>
             </View>
           }
         />

@@ -24,62 +24,60 @@
 @layer theme {
   :root {
     @variant light {
-      /* Base Colors */
-      --background: #fafafa;
-      --foreground: var(--eclipse);
+      /* Base Colors - 活泼渐变风 */
+      --background: #fef7f0;
+      --foreground: #2d2d2d;
 
       /* Surface: Used for non-overlay components (cards, accordions, disclosure groups) */
-      --surface: var(--white);
+      --surface: #ffffff;
       --surface-foreground: var(--foreground);
 
       /* Overlay: Used for floating/overlay components (dialogs, popovers, modals, menus) */
       --overlay: var(--white);
       --overlay-foreground: var(--foreground);
 
-      --muted: oklch(0.5517 0.0138 285.94);
+      --muted: #9ca3af;
 
-      --default: oklch(94% 0.001 286.375);
-      --default-foreground: var(--eclipse);
+      --default: #f3f4f6;
+      --default-foreground: #374151;
 
-      --accent: oklch(0.6204 0.195 253.83);
-      --accent-foreground: var(--snow);
+      /* 活泼主题色：橙色渐变 */
+      --accent: #f97316;
+      --accent-foreground: #ffffff;
 
       /* Form Fields */
-      --field-background: var(--white);
-      --field-foreground: oklch(0.2103 0.0059 285.89);
-      --field-placeholder: var(--muted);
-      --field-border: transparent; /* no border by default on form fields */
+      --field-background: #fff7ed;
+      --field-foreground: #374151;
+      --field-placeholder: #9ca3af;
+      --field-border: transparent;
 
-      /* Status Colors */
-      --success: oklch(0.7329 0.1935 150.81);
-      --success-foreground: var(--eclipse);
+      /* Status Colors - 活泼配色 */
+      --success: #10b981;
+      --success-foreground: #ffffff;
 
-      --warning: oklch(0.7819 0.1585 72.33);
-      --warning-foreground: var(--eclipse);
+      --warning: #f59e0b;
+      --warning-foreground: #ffffff;
 
-      --danger: oklch(0.6532 0.2328 25.74);
-      --danger-foreground: var(--snow);
+      --danger: #ef4444;
+      --danger-foreground: #ffffff;
 
       /* Component Colors */
-      --segment: var(--white);
-      --segment-foreground: var(--eclipse);
+      --segment: #f9fafb;
+      --segment-foreground: #374151;
 
       /* Misc Colors */
-      --border: oklch(90% 0.004 286.32);
-      --separator: oklch(74% 0.004 286.32);
+      --border: #fed7aa;
+      --separator: #fde68a;
       --focus: var(--accent);
       --link: var(--foreground);
 
-      /* Shadows */
+      /* Shadows - 更柔和的阴影 */
       --surface-shadow:
-        0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 0 1px 0 rgba(0, 0, 0, 0.06);
+        0 4px 12px 0 rgba(249, 115, 22, 0.08), 0 2px 4px 0 rgba(0, 0, 0, 0.04);
       --overlay-shadow:
-        0 2px 8px 0 rgba(0, 0, 0, 0.04), 0 -6px 12px 0 rgba(0, 0, 0, 0.02),
-        0 14px 28px 0 rgba(0, 0, 0, 0.06);
+        0 8px 24px 0 rgba(249, 115, 22, 0.12), 0 4px 8px 0 rgba(0, 0, 0, 0.06);
       --field-shadow:
-        0 2px 4px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.06),
-        0 0 1px 0 rgba(0, 0, 0, 0.06);
+        0 2px 8px 0 rgba(249, 115, 22, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
     }
 
     @variant dark {

@@ -47,30 +47,37 @@ export default function CoursesScreen() {
   };
 
   const renderItem = ({ item }: { item: CoursePackage }) => (
-    <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 shadow-sm">
+    <View className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-3xl p-5 mb-4 shadow-lg border border-violet-100">
       <View className="flex-row items-start justify-between">
         <View className="flex-1">
-          <Text className="text-base font-medium text-foreground">{item.name}</Text>
-          <View className="flex-row items-center mt-2">
-            <View className="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-lg mr-2">
-              <Text className="text-xs text-muted">
-                {language === 'zh' ? '教练' : 'Coach'}: {getTeacherName(item.teacher_id)}
+          <View className="flex-row items-center mb-2">
+            <View className="bg-gradient-to-br from-violet-400 to-purple-500 p-2 rounded-xl mr-3">
+              <FontAwesome6 name="book" size={18} color="white" />
+            </View>
+            <Text className="text-lg font-bold text-gray-800">{item.name}</Text>
+          </View>
+          <View className="flex-row items-center">
+            <View className="bg-white/70 px-3 py-1.5 rounded-full mr-2">
+              <Text className="text-xs text-violet-600 font-medium flex-row items-center">
+                <FontAwesome6 name="user-tie" size={10} color="#8b5cf6" /> {getTeacherName(item.teacher_id)}
               </Text>
             </View>
           </View>
         </View>
-        <View className="items-end">
-          <Text className="text-2xl font-bold text-accent">{item.total_lessons}</Text>
-          <Text className="text-xs text-muted">{language === 'zh' ? '总课时' : 'Total'}</Text>
+        <View className="items-center">
+          <View className="bg-gradient-to-br from-violet-400 to-purple-500 px-4 py-2 rounded-2xl shadow-md">
+            <Text className="text-3xl font-black text-white">{item.total_lessons}</Text>
+          </View>
+          <Text className="text-xs text-gray-500 mt-1 font-medium">{language === 'zh' ? '总课时' : 'Total'}</Text>
         </View>
       </View>
 
       {/* 有效期 */}
       {item.start_date && (
-        <View className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-          <View className="flex-row items-center">
-            <FontAwesome6 name="calendar" size={14} color="#6B7280" />
-            <Text className="text-sm text-muted ml-2">
+        <View className="mt-4 pt-3 border-t border-violet-100">
+          <View className="flex-row items-center bg-white/50 px-3 py-2 rounded-xl">
+            <FontAwesome6 name="calendar-days" size={14} color="#8b5cf6" />
+            <Text className="text-sm text-gray-600 ml-2 font-medium">
               {language === 'zh' ? '有效期' : 'Valid Period'}: {item.start_date}
             </Text>
           </View>
@@ -84,17 +91,22 @@ export default function CoursesScreen() {
       <View className="flex-1">
         {/* Header */}
         <View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
-          <View>
-            <Text className="text-2xl font-bold text-foreground">{t('courses.title')}</Text>
-            <Text className="text-sm text-muted mt-1">
-              {language === 'zh' ? '查看课程包信息' : 'View course packages'}
-            </Text>
+          <View className="flex-row items-center">
+            <View className="bg-gradient-to-br from-violet-400 to-purple-500 p-2.5 rounded-xl mr-3">
+              <FontAwesome6 name="book" size={22} color="white" />
+            </View>
+            <View>
+              <Text className="text-2xl font-bold text-gray-800">{t('courses.title')}</Text>
+              <Text className="text-sm text-violet-500 mt-0.5">
+                {language === 'zh' ? '查看课程包信息' : 'View course packages'}
+              </Text>
+            </View>
           </View>
           <TouchableOpacity 
             onPress={toggleLanguage}
-            className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full"
+            className="bg-gradient-to-r from-violet-400 to-purple-500 px-4 py-2 rounded-full shadow-md"
           >
-            <Text className="text-foreground text-sm font-medium">
+            <Text className="text-white text-sm font-semibold">
               {language === 'zh' ? 'EN' : '中'}
             </Text>
           </TouchableOpacity>
@@ -111,8 +123,10 @@ export default function CoursesScreen() {
           }
           ListEmptyComponent={
             <View className="items-center justify-center py-20">
-              <FontAwesome6 name="folder-open" size={48} color="#D1D5DB" />
-              <Text className="text-muted mt-4">{language === 'zh' ? '暂无课程包' : 'No courses'}</Text>
+              <View className="bg-violet-100 p-4 rounded-full mb-3">
+                <FontAwesome6 name="folder-open" size={32} color="#8b5cf6" />
+              </View>
+              <Text className="text-gray-600 font-medium">{language === 'zh' ? '暂无课程包' : 'No courses'}</Text>
             </View>
           }
         />
