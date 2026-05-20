@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal, Alert, Platform } from 'react-native';
 import { Screen } from '@/components/Screen';
-import { statsApi, type Stats } from '@/services/api';
+import { statsApi, lessonsApi, type Stats } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
@@ -23,9 +23,9 @@ function formatDate(date: Date, language: 'zh' | 'en'): string {
   const day = date.getDate();
   
   if (language === 'zh') {
-    return `${month}月${day}日`;
+    return `${year}/${month}月${day}日`;
   }
-  return `${month}/${day}`;
+  return `${year}/${month}/${day}`;
 }
 
 // 获取星期几
@@ -33,10 +33,22 @@ function getDayName(language: 'zh' | 'en'): string {
   return language === 'zh' ? '周六' : 'Sat';
 }
 
+// 获取确认类型
+function getConfirmTypeLabel(type: 'coach' | 'student', language: 'zh' | 'en'): string {
+  if (language === 'zh') {
+    return type === 'coach' ? '教练确认' : '学生确认';
+  }
+  return type === 'coach' ? 'Coach Confirm' : 'Student Confirm';
+}
+
 export default function DashboardScreen() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(true); // 默认已上课
+  const [duration, setDuration] = useState(2); // 默认2课时
+  const [submitting, setSubmitting] = useState(false);
   const { t, language, toggleLanguage } = useTranslation();
 
   const fetchStats = useCallback(async () => {
@@ -61,6 +73,53 @@ export default function DashboardScreen() {
     setRefreshing(true);
     fetchStats();
   }, [fetchStats]);
+
+  const handleConfirmLesson = async (confirmType: 'coach' | 'student') => {
+    if (submitting) return;
+    
+    setSubmitting(true);
+    try {
+      // 格式化日期时间
+      const nextSaturday = getNextSaturday();
+      const dateStr = formatDate(nextSaturday, language);
+      const lessonDateTime = `${dateStr} 10:00-12:00`;
+      
+      await lessonsApi.create({
+        course_package_id: 2,
+        teacher_id: 2,
+        lesson_date: lessonDateTime,
+        duration: duration,
+        remark: `${getConfirmTypeLabel(confirmType, language)}`
+      });
+      
+      // 关闭弹窗并刷新数据
+      setConfirmModalVisible(false);
+      setIsCompleted(true);
+      setDuration(2);
+      fetchStats();
+      
+      Alert.alert(
+        language === 'zh' ? '确认成功' : 'Confirmed',
+        language === 'zh' 
+          ? `已${getConfirmTypeLabel(confirmType, language).replace('确认', '')}确认${isCompleted ? '上课' : '请假'}${duration}课时`
+          : `${confirmType === 'coach' ? 'Coach' : 'Student'} confirmed ${duration} lesson(s)`
+      );
+    } catch (error) {
+      console.error('Failed to confirm lesson:', error);
+      Alert.alert(
+        language === 'zh' ? '确认失败' : 'Error',
+        language === 'zh' ? '请重试' : 'Please try again'
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const openConfirmModal = () => {
+    setIsCompleted(true);
+    setDuration(2);
+    setConfirmModalVisible(true);
+  };
 
   if (loading) {
     return (
@@ -192,7 +251,7 @@ export default function DashboardScreen() {
             </View>
 
             {/* Info Row */}
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-between mb-2.5">
               <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 mr-2">
                 <FontAwesome6 name="user-tie" size={12} color="white" />
                 <Text className="text-white/90 text-xs ml-1.5">
@@ -206,14 +265,174 @@ export default function DashboardScreen() {
                 </Text>
               </View>
             </View>
-            <View className="flex-row justify-center mt-2.5">
+
+            {/* Lessons Badge */}
+            <View className="flex-row justify-center mb-3">
               <View className="bg-yellow-400 px-2.5 py-1 rounded-full">
                 <Text className="text-gray-900 text-xs font-bold">2 {language === 'zh' ? '课时' : 'lessons'}</Text>
               </View>
             </View>
+
+            {/* Confirm Button */}
+            <TouchableOpacity 
+              onPress={openConfirmModal}
+              className="bg-white/25 py-2.5 rounded-xl items-center"
+              activeOpacity={0.8}
+            >
+              <Text className="text-white font-bold text-sm">
+                {language === 'zh' ? '上课确认' : 'Confirm Lesson'}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
+
+      {/* Confirm Modal */}
+      <Modal
+        visible={confirmModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmModalVisible(false)}
+      >
+        <TouchableOpacity 
+          className="flex-1 bg-black/50 justify-center items-center px-4"
+          activeOpacity={1}
+          onPress={() => setConfirmModalVisible(false)}
+        >
+          <TouchableOpacity 
+            className="bg-white rounded-2xl p-5 w-full max-w-sm"
+            activeOpacity={1}
+            onPress={e => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <View className="flex-row items-center justify-between mb-4">
+              <Text className="text-lg font-bold text-gray-900">
+                {language === 'zh' ? '课程确认' : 'Lesson Confirmation'}
+              </Text>
+              <TouchableOpacity 
+                onPress={() => setConfirmModalVisible(false)}
+                className="p-1"
+              >
+                <FontAwesome6 name="xmark" size={20} color="#6b7280" />
+              </TouchableOpacity>
+            </View>
+
+            {/* Course Info */}
+            <View className="bg-gray-50 rounded-xl p-3 mb-4">
+              <Text className="text-sm text-gray-600 mb-1">
+                {dayName} {formattedDate} 10:00-12:00
+              </Text>
+              <Text className="text-xs text-gray-400">
+                {language === 'zh' ? '教练' : 'Coach'}: Hany | {language === 'zh' ? '学生' : 'Student'}: Book
+              </Text>
+            </View>
+
+            {/* Completed Status */}
+            <View className="mb-4">
+              <Text className="text-sm font-medium text-gray-700 mb-2">
+                {language === 'zh' ? '是否已上课' : 'Attendance'}
+              </Text>
+              <View className="flex-row">
+                <TouchableOpacity 
+                  onPress={() => setIsCompleted(true)}
+                  className={`flex-1 py-2.5 rounded-xl items-center mr-2 ${
+                    isCompleted 
+                      ? 'bg-gradient-to-r from-green-400 to-emerald-500 shadow-sm' 
+                      : 'bg-gray-100'
+                  }`}
+                >
+                  <Text className={`text-sm font-medium ${
+                    isCompleted ? 'text-white' : 'text-gray-500'
+                  }`}>
+                    {language === 'zh' ? '已上课' : 'Attended'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => setIsCompleted(false)}
+                  className={`flex-1 py-2.5 rounded-xl items-center ml-2 ${
+                    !isCompleted 
+                      ? 'bg-gradient-to-r from-gray-400 to-gray-500 shadow-sm' 
+                      : 'bg-gray-100'
+                  }`}
+                >
+                  <Text className={`text-sm font-medium ${
+                    !isCompleted ? 'text-white' : 'text-gray-500'
+                  }`}>
+                    {language === 'zh' ? '未上课' : 'Absent'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Duration */}
+            <View className="mb-5">
+              <Text className="text-sm font-medium text-gray-700 mb-2">
+                {language === 'zh' ? '上课课时' : 'Duration'}
+              </Text>
+              <View className="flex-row">
+                <TouchableOpacity 
+                  onPress={() => setDuration(2)}
+                  className={`flex-1 py-2.5 rounded-xl items-center mr-2 ${
+                    duration === 2 
+                      ? 'bg-gradient-to-r from-orange-400 to-amber-500 shadow-sm' 
+                      : 'bg-gray-100'
+                  }`}
+                >
+                  <Text className={`text-sm font-medium ${
+                    duration === 2 ? 'text-white' : 'text-gray-500'
+                  }`}>
+                    2 {language === 'zh' ? '课时' : 'lessons'}
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity 
+                  onPress={() => setDuration(1)}
+                  className={`flex-1 py-2.5 rounded-xl items-center ml-2 ${
+                    duration === 1 
+                      ? 'bg-gradient-to-r from-orange-400 to-amber-500 shadow-sm' 
+                      : 'bg-gray-100'
+                  }`}
+                >
+                  <Text className={`text-sm font-medium ${
+                    duration === 1 ? 'text-white' : 'text-gray-500'
+                  }`}>
+                    1 {language === 'zh' ? '课时' : 'lesson'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Confirm Buttons */}
+            <View className="flex-row">
+              <TouchableOpacity 
+                onPress={() => handleConfirmLesson('coach')}
+                disabled={submitting}
+                className="flex-1 py-3 rounded-xl items-center mr-1.5 bg-gradient-to-r from-violet-500 to-purple-500"
+              >
+                <Text className="text-white font-bold text-sm">
+                  {language === 'zh' ? '教练确认' : 'Coach'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                onPress={() => handleConfirmLesson('student')}
+                disabled={submitting}
+                className="flex-1 py-3 rounded-xl items-center ml-1.5 bg-gradient-to-r from-blue-500 to-cyan-500"
+              >
+                <Text className="text-white font-bold text-sm">
+                  {language === 'zh' ? '学生确认' : 'Student'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity 
+              onPress={() => setConfirmModalVisible(false)}
+              className="mt-3 py-2.5 rounded-xl items-center bg-gray-100"
+            >
+              <Text className="text-gray-500 text-sm">
+                {language === 'zh' ? '取消' : 'Cancel'}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </Screen>
   );
 }
