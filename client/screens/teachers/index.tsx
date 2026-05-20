@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, RefreshControl, TouchableWithoutFeedback } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { teachersApi, type Teacher } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { useTranslation } from '@/i18n';
 
 export default function TeachersScreen() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -14,19 +15,20 @@ export default function TeachersScreen() {
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [formData, setFormData] = useState({ name: '', phone: '', remark: '' });
   const [saving, setSaving] = useState(false);
+  const { t, language, toggleLanguage } = useTranslation();
 
   const fetchTeachers = useCallback(async () => {
     try {
       const data = await teachersApi.getAll();
       setTeachers(data);
     } catch (error) {
-      console.error('获取老师列表失败:', error);
-      Toast.show({ type: 'error', text1: '获取老师列表失败' });
+      console.error('Failed to fetch teachers:', error);
+      Toast.show({ type: 'error', text1: t('messages.error') });
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -53,20 +55,20 @@ export default function TeachersScreen() {
 
   const handleDelete = (teacher: Teacher) => {
     Alert.alert(
-      '确认删除',
-      `确定要删除教练「${teacher.name}」吗？`,
+      t('buttons.confirm'),
+      t('teachers.deleteConfirm'),
       [
-        { text: '取消', style: 'cancel' },
+        { text: t('buttons.cancel'), style: 'cancel' },
         {
-          text: '删除',
+          text: t('buttons.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await teachersApi.delete(teacher.id);
-              Toast.show({ type: 'success', text1: '删除成功' });
+              Toast.show({ type: 'success', text1: t('messages.deleteSuccess') });
               fetchTeachers();
             } catch (error) {
-              Toast.show({ type: 'error', text1: '删除失败' });
+              Toast.show({ type: 'error', text1: t('messages.error') });
             }
           },
         },
@@ -76,7 +78,7 @@ export default function TeachersScreen() {
 
   const handleSave = async () => {
     if (!formData.name.trim()) {
-      Toast.show({ type: 'error', text1: '请输入教练姓名' });
+      Toast.show({ type: 'error', text1: t('validation.required') });
       return;
     }
 
@@ -84,15 +86,15 @@ export default function TeachersScreen() {
     try {
       if (editingTeacher) {
         await teachersApi.update(editingTeacher.id, formData);
-        Toast.show({ type: 'success', text1: '更新成功' });
+        Toast.show({ type: 'success', text1: t('messages.updateSuccess') });
       } else {
         await teachersApi.create(formData);
-        Toast.show({ type: 'success', text1: '添加成功' });
+        Toast.show({ type: 'success', text1: t('messages.addSuccess') });
       }
       setModalVisible(false);
       fetchTeachers();
     } catch (error) {
-      Toast.show({ type: 'error', text1: '保存失败' });
+      Toast.show({ type: 'error', text1: t('messages.error') });
     } finally {
       setSaving(false);
     }
@@ -137,15 +139,27 @@ export default function TeachersScreen() {
         {/* Header */}
         <View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
           <View>
-            <Text className="text-2xl font-bold text-foreground">教练管理</Text>
-            <Text className="text-sm text-muted mt-1">管理网球教练信息</Text>
+            <Text className="text-2xl font-bold text-foreground">{t('teachers.title')}</Text>
+            <Text className="text-sm text-muted mt-1">
+              {language === 'zh' ? '管理网球教练信息' : 'Manage tennis coach info'}
+            </Text>
           </View>
-          <TouchableOpacity 
-            className="bg-accent px-4 py-2 rounded-full"
-            onPress={handleAdd}
-          >
-            <Text className="text-white font-medium">+ 添加</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity 
+              onPress={toggleLanguage}
+              className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full mr-2"
+            >
+              <Text className="text-foreground text-sm font-medium">
+                {language === 'zh' ? 'EN' : '中'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              className="bg-accent px-4 py-2 rounded-full"
+              onPress={handleAdd}
+            >
+              <Text className="text-white font-medium">+ {t('buttons.add')}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* List */}
@@ -160,8 +174,10 @@ export default function TeachersScreen() {
           ListEmptyComponent={
             loading ? null : (
               <View className="items-center pt-20">
-                <Text className="text-muted">暂无教练信息</Text>
-                <Text className="text-sm text-muted mt-1">点击右上角添加教练</Text>
+                <Text className="text-muted">{t('teachers.noTeachers')}</Text>
+                <Text className="text-sm text-muted mt-1">
+                  {language === 'zh' ? '点击右上角添加教练' : 'Tap top right to add teacher'}
+                </Text>
               </View>
             )
           }
@@ -182,7 +198,7 @@ export default function TeachersScreen() {
             <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6">
               <View className="flex-row justify-between items-center mb-6">
                 <Text className="text-xl font-bold text-foreground">
-                  {editingTeacher ? '编辑教练' : '添加教练'}
+                  {editingTeacher ? t('teachers.editTeacher') : t('teachers.addTeacher')}
                 </Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
                   <Text className="text-2xl text-muted">×</Text>
@@ -191,10 +207,10 @@ export default function TeachersScreen() {
 
               <View className="space-y-4">
                 <View>
-                  <Text className="text-sm font-medium text-foreground mb-2">姓名 *</Text>
+                  <Text className="text-sm font-medium text-foreground mb-2">{t('teachers.name')} *</Text>
                   <TextInput
                     className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                    placeholder="请输入教练姓名"
+                    placeholder={t('teachers.placeholder.name')}
                     placeholderTextColor="#9CA3AF"
                     value={formData.name}
                     onChangeText={(text) => setFormData({ ...formData, name: text })}
@@ -202,10 +218,10 @@ export default function TeachersScreen() {
                 </View>
 
                 <View>
-                  <Text className="text-sm font-medium text-foreground mb-2">联系电话</Text>
+                  <Text className="text-sm font-medium text-foreground mb-2">{t('teachers.phone')}</Text>
                   <TextInput
                     className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                    placeholder="请输入联系电话"
+                    placeholder={t('teachers.placeholder.phone')}
                     placeholderTextColor="#9CA3AF"
                     keyboardType="phone-pad"
                     value={formData.phone}
@@ -214,10 +230,10 @@ export default function TeachersScreen() {
                 </View>
 
                 <View>
-                  <Text className="text-sm font-medium text-foreground mb-2">备注</Text>
+                  <Text className="text-sm font-medium text-foreground mb-2">{t('teachers.remark')}</Text>
                   <TextInput
                     className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                    placeholder="请输入备注信息"
+                    placeholder={t('teachers.placeholder.remark')}
                     placeholderTextColor="#9CA3AF"
                     multiline
                     numberOfLines={3}
@@ -232,7 +248,7 @@ export default function TeachersScreen() {
                   disabled={saving}
                 >
                   <Text className="text-white font-semibold text-center">
-                    {saving ? '保存中...' : '保存'}
+                    {saving ? (language === 'zh' ? '保存中...' : 'Saving...') : t('buttons.save')}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -243,5 +259,3 @@ export default function TeachersScreen() {
     </Screen>
   );
 }
-
-import { TouchableWithoutFeedback } from 'react-native';

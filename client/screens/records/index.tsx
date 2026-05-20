@@ -1,10 +1,11 @@
 import { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, RefreshControl, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, RefreshControl, ScrollView, TouchableWithoutFeedback } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { lessonsApi, coursesApi, teachersApi, type LessonRecord, type CoursePackage, type Teacher } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { useTranslation } from '@/i18n';
 
 export default function RecordsScreen() {
   const [records, setRecords] = useState<LessonRecord[]>([]);
@@ -22,6 +23,7 @@ export default function RecordsScreen() {
     remark: '' 
   });
   const [saving, setSaving] = useState(false);
+  const { t, language, toggleLanguage } = useTranslation();
 
   const fetchData = useCallback(async () => {
     try {
@@ -34,13 +36,13 @@ export default function RecordsScreen() {
       setCourses(coursesData);
       setTeachers(teachersData);
     } catch (error) {
-      console.error('获取数据失败:', error);
-      Toast.show({ type: 'error', text1: '获取数据失败' });
+      console.error('Failed to fetch data:', error);
+      Toast.show({ type: 'error', text1: t('messages.error') });
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [t]);
 
   useFocusEffect(
     useCallback(() => {
@@ -79,20 +81,20 @@ export default function RecordsScreen() {
 
   const handleDelete = (record: LessonRecord) => {
     Alert.alert(
-      '确认删除',
-      `确定要删除此上课记录吗？`,
+      t('buttons.confirm'),
+      t('records.deleteConfirm'),
       [
-        { text: '取消', style: 'cancel' },
+        { text: t('buttons.cancel'), style: 'cancel' },
         {
-          text: '删除',
+          text: t('buttons.delete'),
           style: 'destructive',
           onPress: async () => {
             try {
               await lessonsApi.delete(record.id);
-              Toast.show({ type: 'success', text1: '删除成功' });
+              Toast.show({ type: 'success', text1: t('messages.deleteSuccess') });
               fetchData();
             } catch (error) {
-              Toast.show({ type: 'error', text1: '删除失败' });
+              Toast.show({ type: 'error', text1: t('messages.error') });
             }
           },
         },
@@ -102,16 +104,16 @@ export default function RecordsScreen() {
 
   const handleSave = async () => {
     if (!formData.course_package_id) {
-      Toast.show({ type: 'error', text1: '请选择课程' });
+      Toast.show({ type: 'error', text1: t('records.selectCourse') });
       return;
     }
     if (!formData.lesson_date.trim()) {
-      Toast.show({ type: 'error', text1: '请输入上课日期' });
+      Toast.show({ type: 'error', text1: language === 'zh' ? '请输入上课日期' : 'Please enter lesson date' });
       return;
     }
     const duration = parseInt(formData.duration);
     if (isNaN(duration) || duration <= 0) {
-      Toast.show({ type: 'error', text1: '请输入有效的课时数' });
+      Toast.show({ type: 'error', text1: language === 'zh' ? '请输入有效的课时数' : 'Please enter valid duration' });
       return;
     }
 
@@ -127,15 +129,15 @@ export default function RecordsScreen() {
       
       if (editingRecord) {
         await lessonsApi.update(editingRecord.id, data);
-        Toast.show({ type: 'success', text1: '更新成功' });
+        Toast.show({ type: 'success', text1: t('messages.updateSuccess') });
       } else {
         await lessonsApi.create(data);
-        Toast.show({ type: 'success', text1: '记录成功' });
+        Toast.show({ type: 'success', text1: t('messages.addSuccess') });
       }
       setModalVisible(false);
       fetchData();
     } catch (error) {
-      Toast.show({ type: 'error', text1: '保存失败' });
+      Toast.show({ type: 'error', text1: t('messages.error') });
     } finally {
       setSaving(false);
     }
@@ -143,18 +145,21 @@ export default function RecordsScreen() {
 
   const getCourseName = (courseId: number) => {
     const course = courses.find(c => c.id === courseId);
-    return course?.name || '未知课程';
+    return course?.name || 'Unknown';
   };
 
   const getTeacherName = (teacherId?: number) => {
     if (!teacherId) return '-';
     const teacher = teachers.find(t => t.id === teacherId);
-    return teacher?.name || '未知';
+    return teacher?.name || 'Unknown';
   };
 
   const formatDate = (dateStr: string) => {
     try {
       const date = new Date(dateStr);
+      if (language === 'en') {
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
       return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', weekday: 'short' });
     } catch {
       return dateStr;
@@ -176,11 +181,11 @@ export default function RecordsScreen() {
               <View className="flex-row items-center mt-1">
                 <Text className="text-sm text-muted">{formatDate(item.lesson_date)}</Text>
                 <View className="w-1 h-1 bg-muted rounded-full mx-2" />
-                <Text className="text-sm text-muted">教练: {getTeacherName(item.teacher_id)}</Text>
+                <Text className="text-sm text-muted">{getTeacherName(item.teacher_id)}</Text>
               </View>
             </View>
             <View className="bg-accent/10 px-3 py-1 rounded-full">
-              <Text className="text-accent font-medium text-sm">{item.duration}课时</Text>
+              <Text className="text-accent font-medium text-sm">{item.duration} {t('records.lessons')}</Text>
             </View>
           </View>
           {item.remark && (
@@ -194,13 +199,13 @@ export default function RecordsScreen() {
           className="px-4 py-2"
           onPress={() => handleEdit(item)}
         >
-          <Text className="text-blue-500">编辑</Text>
+          <Text className="text-blue-500">{t('buttons.edit')}</Text>
         </TouchableOpacity>
         <TouchableOpacity 
           className="px-4 py-2"
           onPress={() => handleDelete(item)}
         >
-          <Text className="text-red-500">删除</Text>
+          <Text className="text-red-500">{t('buttons.delete')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -212,23 +217,35 @@ export default function RecordsScreen() {
         {/* Header */}
         <View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
           <View>
-            <Text className="text-2xl font-bold text-foreground">上课记录</Text>
-            <Text className="text-sm text-muted mt-1">记录每次网球课</Text>
+            <Text className="text-2xl font-bold text-foreground">{t('records.title')}</Text>
+            <Text className="text-sm text-muted mt-1">
+              {language === 'zh' ? '记录每次网球课' : 'Record each tennis lesson'}
+            </Text>
           </View>
-          <TouchableOpacity 
-            className="bg-accent px-4 py-2 rounded-full"
-            onPress={handleAdd}
-            disabled={courses.length === 0}
-          >
-            <Text className="text-white font-medium">+ 记录</Text>
-          </TouchableOpacity>
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity 
+              onPress={toggleLanguage}
+              className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full mr-2"
+            >
+              <Text className="text-foreground text-sm font-medium">
+                {language === 'zh' ? 'EN' : '中'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              className="bg-accent px-4 py-2 rounded-full"
+              onPress={handleAdd}
+              disabled={courses.length === 0}
+            >
+              <Text className="text-white font-medium">+ {language === 'zh' ? '记录' : 'Add'}</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {courses.length === 0 && !loading && (
           <View className="px-4 py-2">
             <View className="bg-yellow-100 dark:bg-yellow-900/20 rounded-xl p-3">
               <Text className="text-yellow-800 dark:text-yellow-200 text-sm">
-                请先在「课程」中添加课程包后再记录上课
+                {language === 'zh' ? '请先在「课程」中添加课程包后再记录上课' : 'Please add a course package in "Courses" first'}
               </Text>
             </View>
           </View>
@@ -246,8 +263,10 @@ export default function RecordsScreen() {
           ListEmptyComponent={
             loading ? null : (
               <View className="items-center pt-20">
-                <Text className="text-muted">暂无上课记录</Text>
-                <Text className="text-sm text-muted mt-1">点击右上角记录上课</Text>
+                <Text className="text-muted">{t('records.noRecords')}</Text>
+                <Text className="text-sm text-muted mt-1">
+                  {language === 'zh' ? '点击右上角记录上课' : 'Tap top right to add record'}
+                </Text>
               </View>
             )
           }
@@ -268,7 +287,7 @@ export default function RecordsScreen() {
             <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6 max-h-screen-2/3">
               <View className="flex-row justify-between items-center mb-6">
                 <Text className="text-xl font-bold text-foreground">
-                  {editingRecord ? '编辑记录' : '记录上课'}
+                  {editingRecord ? t('records.editRecord') : t('records.addRecord')}
                 </Text>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
                   <Text className="text-2xl text-muted">×</Text>
@@ -278,7 +297,7 @@ export default function RecordsScreen() {
               <ScrollView showsVerticalScrollIndicator={false}>
                 <View className="space-y-4 pb-6">
                   <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">选择课程 *</Text>
+                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.selectCourse')} *</Text>
                     <View className="flex-row flex-wrap">
                       {courses.map((course) => (
                         <TouchableOpacity
@@ -291,7 +310,7 @@ export default function RecordsScreen() {
                           onPress={() => setFormData({ ...formData, course_package_id: course.id })}
                         >
                           <Text className={formData.course_package_id === course.id ? 'text-white' : 'text-foreground'}>
-                            {course.name} ({course.total_lessons}课时)
+                            {course.name}
                           </Text>
                         </TouchableOpacity>
                       ))}
@@ -299,10 +318,10 @@ export default function RecordsScreen() {
                   </View>
 
                   <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">上课日期 *</Text>
+                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.date')} *</Text>
                     <TextInput
                       className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                      placeholder="如：2024-01-15"
+                      placeholder="YYYY-MM-DD"
                       placeholderTextColor="#9CA3AF"
                       value={formData.lesson_date}
                       onChangeText={(text) => setFormData({ ...formData, lesson_date: text })}
@@ -310,7 +329,7 @@ export default function RecordsScreen() {
                   </View>
 
                   <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">课时数 *</Text>
+                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.duration')} *</Text>
                     <View className="flex-row items-center">
                       {[1, 1.5, 2].map((d) => (
                         <TouchableOpacity
@@ -323,7 +342,7 @@ export default function RecordsScreen() {
                           onPress={() => setFormData({ ...formData, duration: d.toString() })}
                         >
                           <Text className={formData.duration === d.toString() ? 'text-white' : 'text-foreground'}>
-                            {d}课时
+                            {d} {t('records.lessons')}
                           </Text>
                         </TouchableOpacity>
                       ))}
@@ -331,7 +350,7 @@ export default function RecordsScreen() {
                   </View>
 
                   <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">教练</Text>
+                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.teacher')}</Text>
                     <View className="flex-row flex-wrap">
                       <TouchableOpacity
                         className={`px-4 py-2 rounded-full mr-2 mb-2 ${
@@ -342,7 +361,7 @@ export default function RecordsScreen() {
                         onPress={() => setFormData({ ...formData, teacher_id: undefined })}
                       >
                         <Text className={!formData.teacher_id ? 'text-white' : 'text-foreground'}>
-                          不指定
+                          {t('courses.noTeacher')}
                         </Text>
                       </TouchableOpacity>
                       {teachers.map((teacher) => (
@@ -364,10 +383,10 @@ export default function RecordsScreen() {
                   </View>
 
                   <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">备注</Text>
+                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.remark')}</Text>
                     <TextInput
                       className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                      placeholder="如：今天学会了正手击球"
+                      placeholder={t('records.placeholder.remark')}
                       placeholderTextColor="#9CA3AF"
                       multiline
                       numberOfLines={3}
@@ -382,7 +401,7 @@ export default function RecordsScreen() {
                     disabled={saving}
                   >
                     <Text className="text-white font-semibold text-center">
-                      {saving ? '保存中...' : '保存'}
+                      {saving ? (language === 'zh' ? '保存中...' : 'Saving...') : t('buttons.save')}
                     </Text>
                   </TouchableOpacity>
                 </View>
@@ -394,5 +413,3 @@ export default function RecordsScreen() {
     </Screen>
   );
 }
-
-import { TouchableWithoutFeedback } from 'react-native';
