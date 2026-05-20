@@ -158,12 +158,15 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        {/* Course Schedule Card */}
+        {/* Course Schedule Card - Next Lesson */}
         <View className="px-4 pb-6">
+          <Text className="text-lg font-semibold text-foreground mb-3">
+            {language === 'zh' ? '下次课程' : 'Next Lesson'}
+          </Text>
           <View className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 shadow-lg">
             <View className="flex-row items-center mb-3">
               <View className="bg-white/20 p-2 rounded-lg mr-3">
-                <FontAwesome6 name="calendar-alt" size={20} color="white" />
+                <FontAwesome6 name="calendar" size={20} color="white" />
               </View>
               <Text className="text-xl font-bold text-white">
                 {language === 'zh' ? '课程计划' : 'Course Schedule'}
@@ -173,7 +176,7 @@ export default function DashboardScreen() {
             {/* Date Display */}
             <View className="bg-white/10 rounded-xl p-4 mb-3">
               <Text className="text-white/80 text-sm mb-1">
-                {language === 'zh' ? '下一节课' : 'Next Lesson'}
+                {language === 'zh' ? '上课时间' : 'Lesson Time'}
               </Text>
               <Text className="text-white text-2xl font-bold">
                 {dayName} {formattedDate}

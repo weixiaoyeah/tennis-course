@@ -1,9 +1,8 @@
 import { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, Alert, RefreshControl, ScrollView, TouchableWithoutFeedback } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, RefreshControl } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { lessonsApi, coursesApi, teachersApi, type LessonRecord, type CoursePackage, type Teacher } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
-import Toast from 'react-native-toast-message';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
 
@@ -13,16 +12,6 @@ export default function RecordsScreen() {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<LessonRecord | null>(null);
-  const [formData, setFormData] = useState({ 
-    course_package_id: undefined as number | undefined, 
-    teacher_id: undefined as number | undefined,
-    lesson_date: '', 
-    duration: '1', 
-    remark: '' 
-  });
-  const [saving, setSaving] = useState(false);
   const { t, language, toggleLanguage } = useTranslation();
 
   const fetchData = useCallback(async () => {
@@ -32,17 +21,17 @@ export default function RecordsScreen() {
         coursesApi.getAll(),
         teachersApi.getAll(),
       ]);
-      setRecords(recordsData);
-      setCourses(coursesData);
-      setTeachers(teachersData);
+      setRecords(recordsData || []);
+      setCourses(coursesData || []);
+      setTeachers(teachersData || []);
     } catch (error) {
       console.error('Failed to fetch data:', error);
-      Toast.show({ type: 'error', text1: t('messages.error') });
+      setRecords([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [t]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -55,159 +44,45 @@ export default function RecordsScreen() {
     fetchData();
   }, [fetchData]);
 
-  const handleAdd = () => {
-    setEditingRecord(null);
-    setFormData({ 
-      course_package_id: courses.length > 0 ? courses[0].id : undefined, 
-      teacher_id: undefined,
-      lesson_date: new Date().toISOString().split('T')[0], 
-      duration: '1', 
-      remark: '' 
-    });
-    setModalVisible(true);
-  };
-
-  const handleEdit = (record: LessonRecord) => {
-    setEditingRecord(record);
-    setFormData({ 
-      course_package_id: record.course_package_id, 
-      teacher_id: record.teacher_id,
-      lesson_date: record.lesson_date, 
-      duration: record.duration.toString(), 
-      remark: record.remark || ''
-    });
-    setModalVisible(true);
-  };
-
-  const handleDelete = (record: LessonRecord) => {
-    Alert.alert(
-      t('buttons.confirm'),
-      t('records.deleteConfirm'),
-      [
-        { text: t('buttons.cancel'), style: 'cancel' },
-        {
-          text: t('buttons.delete'),
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await lessonsApi.delete(record.id);
-              Toast.show({ type: 'success', text1: t('messages.deleteSuccess') });
-              fetchData();
-            } catch (error) {
-              Toast.show({ type: 'error', text1: t('messages.error') });
-            }
-          },
-        },
-      ]
-    );
-  };
-
-  const handleSave = async () => {
-    if (!formData.course_package_id) {
-      Toast.show({ type: 'error', text1: t('records.selectCourse') });
-      return;
-    }
-    if (!formData.lesson_date.trim()) {
-      Toast.show({ type: 'error', text1: language === 'zh' ? '请输入上课日期' : 'Please enter lesson date' });
-      return;
-    }
-    const duration = parseInt(formData.duration);
-    if (isNaN(duration) || duration <= 0) {
-      Toast.show({ type: 'error', text1: language === 'zh' ? '请输入有效的课时数' : 'Please enter valid duration' });
-      return;
-    }
-
-    setSaving(true);
-    try {
-      const data = {
-        course_package_id: formData.course_package_id,
-        teacher_id: formData.teacher_id,
-        lesson_date: formData.lesson_date,
-        duration: duration,
-        remark: formData.remark || undefined,
-      };
-      
-      if (editingRecord) {
-        await lessonsApi.update(editingRecord.id, data);
-        Toast.show({ type: 'success', text1: t('messages.updateSuccess') });
-      } else {
-        await lessonsApi.create(data);
-        Toast.show({ type: 'success', text1: t('messages.addSuccess') });
-      }
-      setModalVisible(false);
-      fetchData();
-    } catch (error) {
-      Toast.show({ type: 'error', text1: t('messages.error') });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const getCourseName = (courseId: number) => {
+  const getCourseName = (courseId?: number) => {
+    if (!courseId) return '-';
     const course = courses.find(c => c.id === courseId);
-    return course?.name || 'Unknown';
+    return course?.name || '-';
   };
 
   const getTeacherName = (teacherId?: number) => {
     if (!teacherId) return '-';
     const teacher = teachers.find(t => t.id === teacherId);
-    return teacher?.name || 'Unknown';
-  };
-
-  const formatDate = (dateStr: string) => {
-    try {
-      const date = new Date(dateStr);
-      if (language === 'en') {
-        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      }
-      return date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric', weekday: 'short' });
-    } catch {
-      return dateStr;
-    }
+    return teacher?.name || '-';
   };
 
   const renderItem = ({ item }: { item: LessonRecord }) => (
     <View className="bg-white dark:bg-gray-800 rounded-2xl p-4 mb-3 shadow-sm">
-      <View className="flex-row items-start">
-        <View className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-full items-center justify-center">
-          <FontAwesome6 name="volleyball" size={20} color="#22C55E" />
-        </View>
-        <View className="flex-1 ml-3">
-          <View className="flex-row justify-between items-start">
-            <View className="flex-1">
-              <Text className="text-base font-medium text-foreground">
-                {getCourseName(item.course_package_id)}
-              </Text>
-              <View className="flex-row items-center mt-1">
-                <Text className="text-sm text-muted">{formatDate(item.lesson_date)}</Text>
-                <View className="w-1 h-1 bg-muted rounded-full mx-2" />
-                <Text className="text-sm text-muted">{getTeacherName(item.teacher_id)}</Text>
-              </View>
-            </View>
-            <View className="bg-accent/10 px-3 py-1 rounded-full">
-              <Text className="text-accent font-medium text-sm">{item.duration} {t('records.lessons')}</Text>
-            </View>
+      <View className="flex-row items-start justify-between">
+        <View className="flex-row items-center">
+          <View className="bg-accent/10 p-2 rounded-xl mr-3">
+            <FontAwesome6 name="circle-check" size={20} color="#4F46E5" />
           </View>
-          {item.remark && (
-            <Text className="text-sm text-muted mt-2" numberOfLines={2}>{item.remark}</Text>
-          )}
+          <View>
+            <Text className="text-base font-medium text-foreground">{item.lesson_date}</Text>
+            <Text className="text-sm text-muted mt-1">
+              {language === 'zh' ? '教练' : 'Coach'}: {getTeacherName(item.teacher_id)}
+            </Text>
+          </View>
+        </View>
+        <View className="items-end">
+          <View className="bg-green-100 dark:bg-green-900/30 px-3 py-1 rounded-full">
+            <Text className="text-green-600 dark:text-green-400 font-medium text-sm">
+              {item.duration} {language === 'zh' ? '课时' : 'lessons'}
+            </Text>
+          </View>
         </View>
       </View>
-      
-      <View className="flex-row justify-end mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
-        <TouchableOpacity 
-          className="px-4 py-2"
-          onPress={() => handleEdit(item)}
-        >
-          <Text className="text-blue-500">{t('buttons.edit')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity 
-          className="px-4 py-2"
-          onPress={() => handleDelete(item)}
-        >
-          <Text className="text-red-500">{t('buttons.delete')}</Text>
-        </TouchableOpacity>
-      </View>
+      {item.remark && (
+        <View className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+          <Text className="text-sm text-muted">{item.remark}</Text>
+        </View>
+      )}
     </View>
   );
 
@@ -219,196 +94,35 @@ export default function RecordsScreen() {
           <View>
             <Text className="text-2xl font-bold text-foreground">{t('records.title')}</Text>
             <Text className="text-sm text-muted mt-1">
-              {language === 'zh' ? '记录每次网球课' : 'Record each tennis lesson'}
+              {language === 'zh' ? '已完成的上课记录' : 'Completed lesson records'}
             </Text>
           </View>
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity 
-              onPress={toggleLanguage}
-              className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full mr-2"
-            >
-              <Text className="text-foreground text-sm font-medium">
-                {language === 'zh' ? 'EN' : '中'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className="bg-accent px-4 py-2 rounded-full"
-              onPress={handleAdd}
-              disabled={courses.length === 0}
-            >
-              <Text className="text-white font-medium">+ {language === 'zh' ? '记录' : 'Add'}</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity 
+            onPress={toggleLanguage}
+            className="bg-gray-100 dark:bg-gray-700 px-3 py-2 rounded-full"
+          >
+            <Text className="text-foreground text-sm font-medium">
+              {language === 'zh' ? 'EN' : '中'}
+            </Text>
+          </TouchableOpacity>
         </View>
-
-        {courses.length === 0 && !loading && (
-          <View className="px-4 py-2">
-            <View className="bg-yellow-100 dark:bg-yellow-900/20 rounded-xl p-3">
-              <Text className="text-yellow-800 dark:text-yellow-200 text-sm">
-                {language === 'zh' ? '请先在「课程」中添加课程包后再记录上课' : 'Please add a course package in "Courses" first'}
-              </Text>
-            </View>
-          </View>
-        )}
 
         {/* List */}
         <FlatList
-          className="flex-1 px-4 pt-2"
           data={records}
-          keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerClassName="p-4"
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
           ListEmptyComponent={
-            loading ? null : (
-              <View className="items-center pt-20">
-                <Text className="text-muted">{t('records.noRecords')}</Text>
-                <Text className="text-sm text-muted mt-1">
-                  {language === 'zh' ? '点击右上角记录上课' : 'Tap top right to add record'}
-                </Text>
-              </View>
-            )
-          }
-          contentContainerStyle={records.length === 0 ? { flex: 1 } : undefined}
-        />
-
-        {/* Add/Edit Modal */}
-        <Modal
-          visible={modalVisible}
-          animationType="slide"
-          transparent
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View className="flex-1 bg-black/50 justify-end">
-            <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-              <View className="flex-1" />
-            </TouchableWithoutFeedback>
-            <View className="bg-white dark:bg-gray-800 rounded-t-3xl p-6 max-h-screen-2/3">
-              <View className="flex-row justify-between items-center mb-6">
-                <Text className="text-xl font-bold text-foreground">
-                  {editingRecord ? t('records.editRecord') : t('records.addRecord')}
-                </Text>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Text className="text-2xl text-muted">×</Text>
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <View className="space-y-4 pb-6">
-                  <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.selectCourse')} *</Text>
-                    <View className="flex-row flex-wrap">
-                      {courses.map((course) => (
-                        <TouchableOpacity
-                          key={course.id}
-                          className={`px-4 py-2 rounded-full mr-2 mb-2 ${
-                            formData.course_package_id === course.id 
-                              ? 'bg-accent' 
-                              : 'bg-gray-100 dark:bg-gray-700'
-                          }`}
-                          onPress={() => setFormData({ ...formData, course_package_id: course.id })}
-                        >
-                          <Text className={formData.course_package_id === course.id ? 'text-white' : 'text-foreground'}>
-                            {course.name}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-
-                  <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.date')} *</Text>
-                    <TextInput
-                      className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                      placeholder="YYYY-MM-DD"
-                      placeholderTextColor="#9CA3AF"
-                      value={formData.lesson_date}
-                      onChangeText={(text) => setFormData({ ...formData, lesson_date: text })}
-                    />
-                  </View>
-
-                  <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.duration')} *</Text>
-                    <View className="flex-row items-center">
-                      {[1, 1.5, 2].map((d) => (
-                        <TouchableOpacity
-                          key={d}
-                          className={`px-6 py-3 rounded-xl mr-3 ${
-                            formData.duration === d.toString() 
-                              ? 'bg-accent' 
-                              : 'bg-gray-100 dark:bg-gray-700'
-                          }`}
-                          onPress={() => setFormData({ ...formData, duration: d.toString() })}
-                        >
-                          <Text className={formData.duration === d.toString() ? 'text-white' : 'text-foreground'}>
-                            {d} {t('records.lessons')}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-
-                  <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.teacher')}</Text>
-                    <View className="flex-row flex-wrap">
-                      <TouchableOpacity
-                        className={`px-4 py-2 rounded-full mr-2 mb-2 ${
-                          !formData.teacher_id 
-                            ? 'bg-accent' 
-                            : 'bg-gray-100 dark:bg-gray-700'
-                        }`}
-                        onPress={() => setFormData({ ...formData, teacher_id: undefined })}
-                      >
-                        <Text className={!formData.teacher_id ? 'text-white' : 'text-foreground'}>
-                          {t('courses.noTeacher')}
-                        </Text>
-                      </TouchableOpacity>
-                      {teachers.map((teacher) => (
-                        <TouchableOpacity
-                          key={teacher.id}
-                          className={`px-4 py-2 rounded-full mr-2 mb-2 ${
-                            formData.teacher_id === teacher.id 
-                              ? 'bg-accent' 
-                              : 'bg-gray-100 dark:bg-gray-700'
-                          }`}
-                          onPress={() => setFormData({ ...formData, teacher_id: teacher.id })}
-                        >
-                          <Text className={formData.teacher_id === teacher.id ? 'text-white' : 'text-foreground'}>
-                            {teacher.name}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  </View>
-
-                  <View>
-                    <Text className="text-sm font-medium text-foreground mb-2">{t('records.remark')}</Text>
-                    <TextInput
-                      className="bg-gray-50 dark:bg-gray-700 rounded-xl px-4 py-3 text-foreground"
-                      placeholder={t('records.placeholder.remark')}
-                      placeholderTextColor="#9CA3AF"
-                      multiline
-                      numberOfLines={3}
-                      value={formData.remark}
-                      onChangeText={(text) => setFormData({ ...formData, remark: text })}
-                    />
-                  </View>
-
-                  <TouchableOpacity
-                    className={`bg-accent rounded-xl py-4 mt-4 ${saving ? 'opacity-50' : ''}`}
-                    onPress={handleSave}
-                    disabled={saving}
-                  >
-                    <Text className="text-white font-semibold text-center">
-                      {saving ? (language === 'zh' ? '保存中...' : 'Saving...') : t('buttons.save')}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
+            <View className="items-center justify-center py-20">
+              <FontAwesome6 name="clipboard-list" size={48} color="#D1D5DB" />
+              <Text className="text-muted mt-4">{language === 'zh' ? '暂无上课记录' : 'No records'}</Text>
             </View>
-          </View>
-        </Modal>
+          }
+        />
       </View>
     </Screen>
   );
