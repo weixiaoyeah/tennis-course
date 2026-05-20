@@ -139,29 +139,14 @@ export default function TeachersScreen() {
             <View className="bg-gradient-to-br from-orange-400 to-amber-400 p-2 rounded-xl mr-2.5">
               <FontAwesome6 name="user-tie" size={18} color="white" />
             </View>
-            <View>
-              <Text className="text-lg font-bold text-gray-800">{t('teachers.title')}</Text>
-              <Text className="text-xs text-orange-500">
-                {language === 'zh' ? '管理教练信息' : 'Manage coaches'}
-              </Text>
-            </View>
+            <Text className="text-lg font-bold text-gray-800">{t('teachers.title')}</Text>
           </View>
-          <View className="flex-row items-center gap-1.5">
-            <TouchableOpacity 
-              onPress={toggleLanguage}
-              className="bg-gradient-to-r from-orange-400 to-amber-400 px-2.5 py-1.5 rounded-full"
-            >
-              <Text className="text-white text-xs font-semibold">
-                {language === 'zh' ? 'EN' : '中'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              className="bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 rounded-full shadow-lg"
-              onPress={handleAdd}
-            >
-              <Text className="text-white text-xs font-bold">+ {t('buttons.add')}</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity 
+            className="bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 rounded-full shadow-lg"
+            onPress={handleAdd}
+          >
+            <Text className="text-white text-xs font-bold">+ {t('buttons.add')}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* List */}

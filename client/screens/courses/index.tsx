@@ -81,25 +81,13 @@ export default function CoursesScreen() {
     <Screen>
       <View className="flex-1">
         {/* Header */}
-        <View className="px-3 pt-2 pb-1.5 flex-row justify-between items-center">
+        <View className="px-3 pt-2 pb-1.5">
           <View className="flex-row items-center">
             <View className="bg-gradient-to-br from-violet-400 to-purple-500 p-2 rounded-xl mr-2.5">
               <FontAwesome6 name="book" size={18} color="white" />
             </View>
-            <View>
-              <Text className="text-lg font-bold text-gray-800">{language === 'zh' ? '课程包' : 'Courses'}</Text>
-              <Text className="text-xs text-violet-500">
-                {language === 'zh' ? '课程信息' : 'Course info'}</Text>
-            </View>
+            <Text className="text-lg font-bold text-gray-800">{language === 'zh' ? '课程包' : 'Courses'}</Text>
           </View>
-          <TouchableOpacity 
-            onPress={toggleLanguage}
-            className="bg-gradient-to-r from-violet-400 to-purple-500 px-2.5 py-1.5 rounded-full"
-          >
-            <Text className="text-white text-xs font-semibold">
-              {language === 'zh' ? 'EN' : '中'}
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* List */}

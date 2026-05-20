@@ -118,25 +118,13 @@ export default function RecordsScreen() {
     <Screen>
       <View className="flex-1">
         {/* Header */}
-        <View className="px-3 pt-2 pb-1.5 flex-row justify-between items-center">
+        <View className="px-3 pt-2 pb-1.5">
           <View className="flex-row items-center">
             <View className="bg-gradient-to-br from-green-400 to-emerald-500 p-2 rounded-xl mr-2.5">
               <FontAwesome6 name="clipboard-list" size={18} color="white" />
             </View>
-            <View>
-              <Text className="text-lg font-bold text-gray-800">{t('records.title')}</Text>
-              <Text className="text-xs text-green-500">
-                {language === 'zh' ? '上课记录' : 'Lesson records'}</Text>
-            </View>
+            <Text className="text-lg font-bold text-gray-800">{t('records.title')}</Text>
           </View>
-          <TouchableOpacity 
-            onPress={toggleLanguage}
-            className="bg-gradient-to-r from-green-400 to-emerald-500 px-2.5 py-1.5 rounded-full"
-          >
-            <Text className="text-white text-xs font-semibold">
-              {language === 'zh' ? 'EN' : '中'}
-            </Text>
-          </TouchableOpacity>
         </View>
 
         {/* Progress Card */}

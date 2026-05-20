@@ -194,9 +194,6 @@ export default function DashboardScreen() {
             <Text className="text-xl font-bold text-foreground">
               {language === 'zh' ? '网球课程' : 'Tennis'}
             </Text>
-            <Text className="text-xs text-orange-500">
-              {language === 'zh' ? '课时统计' : 'Statistics'}
-            </Text>
           </View>
         </View>
 
