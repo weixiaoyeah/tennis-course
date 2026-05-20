@@ -17,10 +17,10 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: packagesError.message });
     }
     
-    // 获取所有上课记录
+    // 获取所有上课记录（包含已确认和未上课的）
     const { data: records, error: recordsError } = await client
       .from('lesson_records')
-      .select('course_package_id, duration');
+      .select('course_package_id, duration, confirmed_by');
     
     if (recordsError) {
       return res.status(500).json({ error: recordsError.message });
@@ -35,15 +35,26 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: teachersError.message });
     }
     
-    // 计算统计
+    // 计算统计 - 只计算confirmed_by不为空的记录（已确认的上课）
     const totalLessons = packages?.reduce((sum: number, p: { total_lessons?: number }) => sum + (p.total_lessons || 0), 0) || 0;
-    const usedLessons = records?.reduce((sum: number, r: { duration?: number }) => sum + (r.duration || 0), 0) || 0;
+    const usedLessons = records?.reduce((sum: number, r: { duration?: number; confirmed_by?: string }) => {
+      // 只有confirmed_by不为空才计入已用课时
+      if (r.confirmed_by) {
+        return sum + (r.duration || 0);
+      }
+      return sum;
+    }, 0) || 0;
     const remainingLessons = totalLessons - usedLessons;
     
     // 各课程包统计
     const packageStats = (packages || []).map((pkg: { id: number; name: string; total_lessons: number; teacher_id?: number }) => {
       const pkgRecords = records?.filter((r: { course_package_id?: number }) => r.course_package_id === pkg.id) || [];
-      const used = pkgRecords.reduce((sum: number, r: { duration?: number }) => sum + (r.duration || 0), 0);
+      const used = pkgRecords.reduce((sum: number, r: { duration?: number; confirmed_by?: string }) => {
+        if (r.confirmed_by) {
+          return sum + (r.duration || 0);
+        }
+        return sum;
+      }, 0);
       return {
         id: pkg.id,
         name: pkg.name,

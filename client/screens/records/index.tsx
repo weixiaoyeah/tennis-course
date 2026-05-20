@@ -57,13 +57,33 @@ export default function RecordsScreen() {
   };
 
   // 计算课时统计
+  // 只统计已确认的课时（未上课不扣课时）
   const totalLessons = courses.reduce((sum, c) => sum + (c.total_lessons || 0), 0);
-  const usedLessons = records.reduce((sum, r) => sum + (r.duration || 0), 0);
+  const usedLessons = records.reduce((sum, r) => {
+    if (r.confirmed_by) {
+      return sum + (r.duration || 0);
+    }
+    return sum;
+  }, 0);
   const remainingLessons = totalLessons - usedLessons;
   const progressPercent = totalLessons > 0 ? Math.round((usedLessons / totalLessons) * 100) : 0;
 
   const getConfirmBadge = (confirmed_by?: string) => {
-    if (!confirmed_by) return null;
+    // 未上课显示灰色标签
+    if (!confirmed_by) {
+      return (
+        <View className="flex-row items-center bg-gray-300 px-2 py-0.5 rounded-full shadow-sm">
+          <FontAwesome6 
+            name="ban" 
+            size={9} 
+            color="white" 
+          />
+          <Text className="text-white text-xs ml-1 font-semibold">
+            {language === 'zh' ? '未上课' : 'Absent'}
+          </Text>
+        </View>
+      );
+    }
     
     const isCoach = confirmed_by === 'coach';
     return (

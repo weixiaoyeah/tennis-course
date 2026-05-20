@@ -90,14 +90,20 @@ export default function DashboardScreen() {
       const dateStr = formatDate(nextSaturday, language);
       const lessonDateTime = `${dateStr} 10:00-12:00`;
       
-      await lessonsApi.create({
+      // 已上课才传confirmed_by，未上课不传
+      const recordData: any = {
         course_package_id: 2,
         teacher_id: 2,
         lesson_date: lessonDateTime,
         duration: duration,
-        remark: `${confirmRole}确认`,
-        confirmed_by: confirmType
-      });
+        remark: isCompleted ? `${confirmRole}确认` : '未上课'
+      };
+      
+      if (isCompleted) {
+        recordData.confirmed_by = confirmType;
+      }
+      
+      await lessonsApi.create(recordData);
       
       // 关闭弹窗并刷新数据
       setSecondConfirmVisible(false);
@@ -109,8 +115,12 @@ export default function DashboardScreen() {
       Alert.alert(
         language === 'zh' ? '确认成功' : 'Confirmed',
         language === 'zh' 
-          ? `${confirmRole}确认成功，已${isCompleted ? '上课' : '请假'}${duration}课时，课时已扣除`
-          : `${confirmRole} confirmed: ${duration} lesson(s) recorded and deducted`
+          ? isCompleted 
+            ? `${confirmRole}确认成功，已上课${duration}课时，课时已扣除`
+            : `${confirmRole}确认成功，已记录为未上课`
+          : isCompleted
+            ? `${confirmRole} confirmed: ${duration} lesson(s) recorded and deducted`
+            : `${confirmRole} confirmed: Recorded as absent`
       );
     } catch (error) {
       console.error('Failed to confirm lesson:', error);
