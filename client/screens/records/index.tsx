@@ -67,14 +67,19 @@ export default function RecordsScreen() {
     
     const isCoach = confirmed_by === 'coach';
     return (
-      <View className={`${isCoach ? 'bg-purple-100' : 'bg-blue-100'} px-2 py-0.5 rounded-full flex-row items-center`}>
+      <View className={`flex-row items-center ${isCoach 
+        ? 'bg-gradient-to-r from-violet-500 to-purple-500' 
+        : 'bg-gradient-to-r from-blue-500 to-cyan-500'} px-2 py-0.5 rounded-full shadow-sm`}>
         <FontAwesome6 
-          name={isCoach ? 'user-tie' : 'book'} 
-          size={8} 
-          color={isCoach ? '#9333ea' : '#2563eb'} 
+          name={isCoach ? 'user-tie' : 'graduation-cap'} 
+          size={9} 
+          color="white" 
         />
-        <Text className={`text-xs ml-1 font-medium ${isCoach ? 'text-purple-600' : 'text-blue-600'}`}>
-          {isCoach ? (language === 'zh' ? '教练' : 'Coach') : (language === 'zh' ? '学生' : 'Student')}
+        <Text className="text-white text-xs ml-1 font-semibold">
+          {isCoach 
+            ? (language === 'zh' ? '教练确认' : 'Coach') 
+            : (language === 'zh' ? '学生确认' : 'Student')
+          }
         </Text>
       </View>
     );

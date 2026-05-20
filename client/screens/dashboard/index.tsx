@@ -49,6 +49,8 @@ export default function DashboardScreen() {
   const [isCompleted, setIsCompleted] = useState(true); // 默认已上课
   const [duration, setDuration] = useState(2); // 默认2课时
   const [submitting, setSubmitting] = useState(false);
+  const [pendingConfirmRole, setPendingConfirmRole] = useState<'coach' | 'student' | null>(null);
+  const [secondConfirmVisible, setSecondConfirmVisible] = useState(false);
   const { t, language, toggleLanguage } = useTranslation();
 
   const fetchStats = useCallback(async () => {
@@ -426,7 +428,10 @@ export default function DashboardScreen() {
             {/* Confirm Buttons */}
             <View className="flex-row">
               <TouchableOpacity 
-                onPress={() => handleConfirmLesson('coach')}
+                onPress={() => {
+                  setPendingConfirmRole('coach');
+                  setSecondConfirmVisible(true);
+                }}
                 disabled={submitting}
                 className="flex-1 py-3 rounded-xl items-center mr-1.5 bg-gradient-to-r from-violet-500 to-purple-500"
               >
@@ -435,7 +440,10 @@ export default function DashboardScreen() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity 
-                onPress={() => handleConfirmLesson('student')}
+                onPress={() => {
+                  setPendingConfirmRole('student');
+                  setSecondConfirmVisible(true);
+                }}
                 disabled={submitting}
                 className="flex-1 py-3 rounded-xl items-center ml-1.5 bg-gradient-to-r from-blue-500 to-cyan-500"
               >
@@ -447,6 +455,90 @@ export default function DashboardScreen() {
             <TouchableOpacity 
               onPress={() => setConfirmModalVisible(false)}
               className="mt-3 py-2.5 rounded-xl items-center bg-gray-100"
+            >
+              <Text className="text-gray-500 text-sm">
+                {language === 'zh' ? '取消' : 'Cancel'}
+              </Text>
+            </TouchableOpacity>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* Second Confirm Modal */}
+      <Modal
+        visible={secondConfirmVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSecondConfirmVisible(false)}
+      >
+        <TouchableOpacity 
+          className="flex-1 bg-black/50 justify-center items-center px-4"
+          activeOpacity={1}
+          onPress={() => setSecondConfirmVisible(false)}
+        >
+          <TouchableOpacity 
+            className="bg-white rounded-2xl p-5 w-full max-w-sm"
+            activeOpacity={1}
+            onPress={e => e.stopPropagation()}
+          >
+            {/* Warning Icon */}
+            <View className="items-center mb-4">
+              <View className="bg-amber-100 p-3 rounded-full mb-2">
+                <FontAwesome6 name="circle-exclamation" size={28} color="#f59e0b" />
+              </View>
+              <Text className="text-lg font-bold text-gray-900">
+                {language === 'zh' ? '确认上课记录' : 'Confirm Attendance'}
+              </Text>
+            </View>
+
+            {/* Confirm Info */}
+            <View className="bg-amber-50 rounded-xl p-4 mb-4">
+              <Text className="text-sm text-gray-700 text-center leading-relaxed">
+                {language === 'zh' 
+                  ? `确认后，将记录本次上课 ${isCompleted ? duration : 0} 课时，课时将从课程包中扣除。是否确认？`
+                  : `After confirmation, this will record ${isCompleted ? duration : 0} lesson(s) and deduct from your package. Continue?`
+                }
+              </Text>
+            </View>
+
+            {/* Role Badge */}
+            <View className="items-center mb-5">
+              <View className={`px-4 py-1.5 rounded-full ${
+                pendingConfirmRole === 'coach' 
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-500' 
+                  : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+              }`}>
+                <Text className="text-white font-semibold text-sm">
+                  {pendingConfirmRole === 'coach' 
+                    ? (language === 'zh' ? '教练确认' : 'Coach Confirm')
+                    : (language === 'zh' ? '学生确认' : 'Student Confirm')
+                  }
+                </Text>
+              </View>
+            </View>
+
+            {/* Confirm Buttons */}
+            <TouchableOpacity 
+              onPress={async () => {
+                setSecondConfirmVisible(false);
+                if (pendingConfirmRole) {
+                  await handleConfirmLesson(pendingConfirmRole);
+                }
+              }}
+              disabled={submitting}
+              className={`py-3 rounded-xl items-center mb-2 ${
+                pendingConfirmRole === 'coach' 
+                  ? 'bg-gradient-to-r from-violet-500 to-purple-500' 
+                  : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+              }`}
+            >
+              <Text className="text-white font-bold text-sm">
+                {language === 'zh' ? '确认' : 'Confirm'}
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity 
+              onPress={() => setSecondConfirmVisible(false)}
+              className="py-2.5 rounded-xl items-center bg-gray-100"
             >
               <Text className="text-gray-500 text-sm">
                 {language === 'zh' ? '取消' : 'Cancel'}
