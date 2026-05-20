@@ -31,6 +31,21 @@ export interface LessonRecord {
   course_packages?: { name: string };
 }
 
+export interface CourseSchedule {
+  id: number;
+  course_package_id: number;
+  teacher_id: number;
+  schedule_date: string;
+  schedule_time: string;
+  duration: number;
+  status: string;
+  confirmed_by?: string;
+  confirmed_at?: string;
+  remark?: string;
+  created_at: string;
+  teacher?: { name: string };
+}
+
 export interface CoursePackageStats extends CoursePackage {
   used_lessons: number;
   remaining_lessons: number;
@@ -44,6 +59,7 @@ export interface Stats {
   total_teachers: number;
   total_records: number;
   package_stats: CoursePackageStats[];
+  next_schedule?: CourseSchedule;
 }
 
 // 老师 API
@@ -178,6 +194,22 @@ export const lessonsApi = {
       method: 'DELETE',
     });
     if (!res.ok) throw new Error('删除上课记录失败');
+  },
+
+  // 确认课程计划
+  confirmSchedule: async (data: { 
+    schedule_id: number; 
+    is_completed: boolean; 
+    duration: number; 
+    confirmed_by?: 'coach' | 'student' 
+  }): Promise<{ success: boolean; message: string }> => {
+    const res = await fetch(`${API_BASE}/lessons/confirm-schedule`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error('确认课程失败');
+    return res.json();
   },
 };
 

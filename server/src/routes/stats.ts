@@ -17,10 +17,11 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: packagesError.message });
     }
     
-    // 获取所有上课记录（包含已确认和未上课的）
+    // 获取所有上课记录（只获取已确认的）
     const { data: records, error: recordsError } = await client
       .from('lesson_records')
-      .select('course_package_id, duration, confirmed_by');
+      .select('course_package_id, duration, confirmed_by, lesson_date, teacher_id, remark, created_at')
+      .or('confirmed_by.eq.coach,confirmed_by.eq.student');
     
     if (recordsError) {
       return res.status(500).json({ error: recordsError.message });
@@ -35,26 +36,33 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: teachersError.message });
     }
     
-    // 计算统计 - 只计算confirmed_by不为空的记录（已确认的上课）
+    // 获取最近一次未确认的课程计划
+    const { data: nextSchedule, error: scheduleError } = await client
+      .from('course_schedules')
+      .select('*')
+      .eq('status', 'pending')
+      .order('schedule_date', { ascending: true })
+      .limit(1);
+    
+    if (scheduleError) {
+      console.error('Error fetching next schedule:', scheduleError);
+    }
+    
+    // 计算统计 - 只计算有confirmed_by的记录（已确认的上课）
     const totalLessons = packages?.reduce((sum: number, p: { total_lessons?: number }) => sum + (p.total_lessons || 0), 0) || 0;
-    const usedLessons = records?.reduce((sum: number, r: { duration?: number; confirmed_by?: string }) => {
-      // 只有confirmed_by不为空才计入已用课时
-      if (r.confirmed_by) {
-        return sum + (r.duration || 0);
-      }
-      return sum;
-    }, 0) || 0;
+    const usedLessons = records?.reduce((sum: number, r: { duration?: number }) => sum + (r.duration || 0), 0) || 0;
     const remainingLessons = totalLessons - usedLessons;
+    
+    // 查找对应的教练信息
+    const nextScheduleWithTeacher = nextSchedule?.[0] ? {
+      ...nextSchedule[0],
+      teacher: teachers?.find((t: { id: number }) => t.id === nextSchedule[0].teacher_id)
+    } : null;
     
     // 各课程包统计
     const packageStats = (packages || []).map((pkg: { id: number; name: string; total_lessons: number; teacher_id?: number }) => {
       const pkgRecords = records?.filter((r: { course_package_id?: number }) => r.course_package_id === pkg.id) || [];
-      const used = pkgRecords.reduce((sum: number, r: { duration?: number; confirmed_by?: string }) => {
-        if (r.confirmed_by) {
-          return sum + (r.duration || 0);
-        }
-        return sum;
-      }, 0);
+      const used = pkgRecords.reduce((sum: number, r: { duration?: number }) => sum + (r.duration || 0), 0);
       return {
         id: pkg.id,
         name: pkg.name,
@@ -73,6 +81,7 @@ router.get('/', async (req, res) => {
       total_teachers: teachers?.length || 0,
       total_records: records?.length || 0,
       package_stats: packageStats,
+      next_schedule: nextScheduleWithTeacher,
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });

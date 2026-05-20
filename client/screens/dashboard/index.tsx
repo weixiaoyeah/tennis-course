@@ -6,26 +6,16 @@ import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
 
-// 获取下一个周六的日期
-function getNextSaturday(): Date {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
-  const daysUntilSaturday = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
-  const nextSat = new Date(today);
-  nextSat.setDate(today.getDate() + daysUntilSaturday);
-  return nextSat;
-}
-
-// 格式化日期
-function formatDate(date: Date, language: 'zh' | 'en'): string {
-  const year = date.getFullYear();
+// 格式化课程日期
+function formatScheduleDate(dateStr: string, language: 'zh' | 'en'): string {
+  const date = new Date(dateStr);
   const month = date.getMonth() + 1;
   const day = date.getDate();
   
   if (language === 'zh') {
-    return `${year}/${month}月${day}日`;
+    return `${month}月${day}日`;
   }
-  return `${year}/${month}/${day}`;
+  return `${month}/${day}`;
 }
 
 // 获取星期几
@@ -81,29 +71,27 @@ export default function DashboardScreen() {
     
     setSubmitting(true);
     try {
+      // 如果没有下次课程计划，提示用户
+      if (!stats?.next_schedule) {
+        Alert.alert(
+          language === 'zh' ? '无可确认课程' : 'No Schedule',
+          language === 'zh' ? '当前没有待确认的课程计划' : 'No pending course schedule'
+        );
+        setSubmitting(false);
+        return;
+      }
+      
       const confirmRole = confirmType === 'coach' 
         ? (language === 'zh' ? '教练' : 'Coach')
         : (language === 'zh' ? '学生' : 'Student');
       
-      // 格式化日期时间
-      const nextSaturday = getNextSaturday();
-      const dateStr = formatDate(nextSaturday, language);
-      const lessonDateTime = `${dateStr} 10:00-12:00`;
-      
-      // 已上课才传confirmed_by，未上课不传
-      const recordData: any = {
-        course_package_id: 2,
-        teacher_id: 2,
-        lesson_date: lessonDateTime,
-        duration: duration,
-        remark: isCompleted ? `${confirmRole}确认` : '未上课'
-      };
-      
-      if (isCompleted) {
-        recordData.confirmed_by = confirmType;
-      }
-      
-      await lessonsApi.create(recordData);
+      // 调用确认API
+      await lessonsApi.confirmSchedule({
+        schedule_id: stats.next_schedule.id,
+        confirmed_by: confirmType,
+        is_completed: isCompleted,
+        duration: duration
+      });
       
       // 关闭弹窗并刷新数据
       setSecondConfirmVisible(false);
@@ -152,11 +140,6 @@ export default function DashboardScreen() {
   const remainingPercent = stats && stats.total_lessons > 0 
     ? Math.round((stats.remaining_lessons / stats.total_lessons) * 100) 
     : 0;
-
-  // 计算下一个周六
-  const nextSaturday = getNextSaturday();
-  const formattedDate = formatDate(nextSaturday, language);
-  const dayName = getDayName(language);
 
   return (
     <Screen>
@@ -261,7 +244,13 @@ export default function DashboardScreen() {
                 {language === 'zh' ? '上课时间' : 'Time'}
               </Text>
               <Text className="text-white text-lg font-bold">
-                {dayName} {formattedDate} 10:00-12:00
+                {stats?.next_schedule ? (
+                  <>
+                    {getDayName(language)} {formatScheduleDate(stats.next_schedule.schedule_date, language)} {stats.next_schedule.schedule_time}
+                  </>
+                ) : (
+                  language === 'zh' ? '暂无课程计划' : 'No Schedule'
+                )}
               </Text>
             </View>
 
@@ -270,7 +259,7 @@ export default function DashboardScreen() {
               <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 mr-2">
                 <FontAwesome6 name="user-tie" size={12} color="white" />
                 <Text className="text-white/90 text-xs ml-1.5">
-                  {language === 'zh' ? '教练' : 'Coach'}: Hany
+                  {language === 'zh' ? '教练' : 'Coach'}: {stats?.next_schedule?.teacher?.name || 'Hany'}
                 </Text>
               </View>
               <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 ml-2">
@@ -284,7 +273,9 @@ export default function DashboardScreen() {
             {/* Lessons Badge */}
             <View className="flex-row justify-center mb-3">
               <View className="bg-yellow-400 px-2.5 py-1 rounded-full">
-                <Text className="text-gray-900 text-xs font-bold">2 {language === 'zh' ? '课时' : 'lessons'}</Text>
+                <Text className="text-gray-900 text-xs font-bold">
+                  {stats?.next_schedule?.duration || 2} {language === 'zh' ? '课时' : 'lessons'}
+                </Text>
               </View>
             </View>
 
@@ -293,6 +284,7 @@ export default function DashboardScreen() {
               onPress={openConfirmModal}
               className="bg-white/25 py-2.5 rounded-xl items-center"
               activeOpacity={0.8}
+              disabled={!stats?.next_schedule}
             >
               <Text className="text-white font-bold text-sm">
                 {language === 'zh' ? '上课确认' : 'Confirm Lesson'}
@@ -335,10 +327,13 @@ export default function DashboardScreen() {
             {/* Course Info */}
             <View className="bg-gray-50 rounded-xl p-3 mb-4">
               <Text className="text-sm text-gray-600 mb-1">
-                {dayName} {formattedDate} 10:00-12:00
+                {stats?.next_schedule 
+                  ? `${getDayName(language)} ${formatScheduleDate(stats.next_schedule.schedule_date, language)} ${stats.next_schedule.schedule_time}`
+                  : (language === 'zh' ? '暂无课程计划' : 'No Schedule')
+                }
               </Text>
               <Text className="text-xs text-gray-400">
-                {language === 'zh' ? '教练' : 'Coach'}: Hany | {language === 'zh' ? '学生' : 'Student'}: Book
+                {language === 'zh' ? '教练' : 'Coach'}: {stats?.next_schedule?.teacher?.name || 'Hany'} | {language === 'zh' ? '学生' : 'Student'}: Book
               </Text>
             </View>
 
