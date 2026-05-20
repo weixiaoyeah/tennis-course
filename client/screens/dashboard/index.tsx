@@ -89,7 +89,7 @@ export default function DashboardScreen() {
       await lessonsApi.confirmSchedule({
         schedule_id: stats.next_schedule.id,
         confirmed_by: confirmType,
-        is_completed: isCompleted,
+        is_attended: isCompleted,
         duration: duration
       });
       
