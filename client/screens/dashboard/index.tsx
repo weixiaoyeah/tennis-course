@@ -1,10 +1,37 @@
 import { useState, useCallback } from 'react';
-import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { statsApi, type Stats } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
+
+// 获取下一个周六的日期
+function getNextSaturday(): Date {
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
+  const daysUntilSaturday = dayOfWeek === 6 ? 0 : (6 - dayOfWeek);
+  const nextSat = new Date(today);
+  nextSat.setDate(today.getDate() + daysUntilSaturday);
+  return nextSat;
+}
+
+// 格式化日期
+function formatDate(date: Date, language: 'zh' | 'en'): string {
+  const year = date.getFullYear();
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  
+  if (language === 'zh') {
+    return `${year}年${month}月${day}日`;
+  }
+  return `${month}/${day}/${year}`;
+}
+
+// 获取星期几
+function getDayName(language: 'zh' | 'en'): string {
+  return language === 'zh' ? '周六' : 'Saturday';
+}
 
 export default function DashboardScreen() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -49,6 +76,11 @@ export default function DashboardScreen() {
     ? Math.round((stats.remaining_lessons / stats.total_lessons) * 100) 
     : 0;
 
+  // 计算下一个周六
+  const nextSaturday = getNextSaturday();
+  const formattedDate = formatDate(nextSaturday, language);
+  const dayName = getDayName(language);
+
   return (
     <Screen>
       <ScrollView
@@ -78,6 +110,54 @@ export default function DashboardScreen() {
           <Text className="text-sm text-muted mt-1">
             {language === 'zh' ? '课时统计' : 'Lesson Statistics'}
           </Text>
+        </View>
+
+        {/* Course Schedule Card */}
+        <View className="px-4 pb-4">
+          <View className="bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-5 shadow-lg">
+            <View className="flex-row items-center mb-3">
+              <View className="bg-white/20 p-2 rounded-lg mr-3">
+                <FontAwesome6 name="calendar-alt" size={20} color="white" />
+              </View>
+              <Text className="text-xl font-bold text-white">
+                {language === 'zh' ? '课程计划' : 'Course Schedule'}
+              </Text>
+            </View>
+            
+            {/* Date Display */}
+            <View className="bg-white/10 rounded-xl p-4 mb-3">
+              <Text className="text-white/80 text-sm mb-1">
+                {language === 'zh' ? '下一节课' : 'Next Lesson'}
+              </Text>
+              <Text className="text-white text-2xl font-bold">
+                {dayName} {formattedDate}
+              </Text>
+              <Text className="text-white/90 text-lg mt-1">
+                10:00 - 12:00
+              </Text>
+            </View>
+
+            {/* Info Row */}
+            <View className="flex-row justify-between">
+              <View className="flex-row items-center">
+                <FontAwesome6 name="user-tie" size={14} color="white" />
+                <Text className="text-white/90 text-sm ml-2">
+                  {language === 'zh' ? '教练' : 'Coach'}: Hany
+                </Text>
+              </View>
+              <View className="flex-row items-center">
+                <FontAwesome6 name="book" size={14} color="white" />
+                <Text className="text-white/90 text-sm ml-2">
+                  {language === 'zh' ? '学生' : 'Student'}: Book
+                </Text>
+              </View>
+              <View className="bg-white/20 px-2 py-1 rounded-full">
+                <Text className="text-white text-xs font-medium">
+                  2 {language === 'zh' ? '课时' : 'lessons'}
+                </Text>
+              </View>
+            </View>
+          </View>
         </View>
 
         {/* Main Stats Card */}
