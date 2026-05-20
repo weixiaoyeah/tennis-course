@@ -41,9 +41,10 @@ export const lesson_records = pgTable(
     id: serial().primaryKey(),
     course_package_id: integer("course_package_id").notNull().references(() => course_packages.id, { onDelete: "cascade" }),
     teacher_id: integer("teacher_id").references(() => teachers.id),
-    lesson_date: varchar("lesson_date", { length: 20 }).notNull(),
+    lesson_date: varchar("lesson_date", { length: 30 }).notNull(),
     duration: integer("duration").notNull().default(1),
     remark: varchar("remark", { length: 500 }),
+    confirmed_by: varchar("confirmed_by", { length: 20 }),
     created_at: timestamp("created_at", { withTimezone: true, mode: 'string' }).defaultNow().notNull(),
   },
   (table) => [
@@ -60,7 +61,7 @@ const { createInsertSchema: createLessonRecordInsertSchema } = createSchemaFacto
 
 export const insertTeacherSchema = createTeacherInsertSchema(teachers).pick({ name: true, phone: true, remark: true });
 export const insertCoursePackageSchema = createCoursePackageInsertSchema(course_packages).pick({ name: true, total_lessons: true, teacher_id: true, start_date: true });
-export const insertLessonRecordSchema = createLessonRecordInsertSchema(lesson_records).pick({ course_package_id: true, teacher_id: true, lesson_date: true, duration: true, remark: true });
+export const insertLessonRecordSchema = createLessonRecordInsertSchema(lesson_records).pick({ course_package_id: true, teacher_id: true, lesson_date: true, duration: true, remark: true, confirmed_by: true });
 
 export type Teacher = typeof teachers.$inferSelect;
 export type InsertTeacher = z.infer<typeof insertTeacherSchema>;

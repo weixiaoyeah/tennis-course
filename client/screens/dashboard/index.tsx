@@ -79,64 +79,48 @@ export default function DashboardScreen() {
   const handleConfirmLesson = async (confirmType: 'coach' | 'student') => {
     if (submitting) return;
     
-    // 二次确认提示
-    const confirmRole = confirmType === 'coach' 
-      ? (language === 'zh' ? '教练' : 'Coach')
-      : (language === 'zh' ? '学生' : 'Student');
-    const confirmTitle = language === 'zh' ? '确认上课' : 'Confirm Lesson';
-    const confirmMsg = language === 'zh'
-      ? `${confirmRole}确认后，将记录本次${isCompleted ? '上课' : '请假'}${duration}课时，课时将从课程包中扣除。是否确认？`
-      : `${confirmRole} confirmation: This ${isCompleted ? 'lesson' : 'absence'} of ${duration} lesson(s) will be recorded and deducted. Confirm?`;
-    
-    Alert.alert(confirmTitle, confirmMsg, [
-      {
-        text: language === 'zh' ? '取消' : 'Cancel',
-        style: 'cancel',
-      },
-      {
-        text: language === 'zh' ? '确认' : 'Confirm',
-        style: 'default',
-        onPress: async () => {
-          setSubmitting(true);
-          try {
-            // 格式化日期时间
-            const nextSaturday = getNextSaturday();
-            const dateStr = formatDate(nextSaturday, language);
-            const lessonDateTime = `${dateStr} 10:00-12:00`;
-            
-            await lessonsApi.create({
-              course_package_id: 2,
-              teacher_id: 2,
-              lesson_date: lessonDateTime,
-              duration: duration,
-              remark: `${confirmRole}确认`,
-              confirmed_by: confirmType
-            });
-            
-            // 关闭弹窗并刷新数据
-            setConfirmModalVisible(false);
-            setIsCompleted(true);
-            setDuration(2);
-            fetchStats();
-            
-            Alert.alert(
-              language === 'zh' ? '确认成功' : 'Confirmed',
-              language === 'zh' 
-                ? `${confirmRole}确认成功，已${isCompleted ? '上课' : '请假'}${duration}课时，课时已扣除`
-                : `${confirmRole} confirmed: ${duration} lesson(s) recorded and deducted`
-            );
-          } catch (error) {
-            console.error('Failed to confirm lesson:', error);
-            Alert.alert(
-              language === 'zh' ? '确认失败' : 'Error',
-              language === 'zh' ? '请重试' : 'Please try again'
-            );
-          } finally {
-            setSubmitting(false);
-          }
-        }
-      }
-    ]);
+    setSubmitting(true);
+    try {
+      const confirmRole = confirmType === 'coach' 
+        ? (language === 'zh' ? '教练' : 'Coach')
+        : (language === 'zh' ? '学生' : 'Student');
+      
+      // 格式化日期时间
+      const nextSaturday = getNextSaturday();
+      const dateStr = formatDate(nextSaturday, language);
+      const lessonDateTime = `${dateStr} 10:00-12:00`;
+      
+      await lessonsApi.create({
+        course_package_id: 2,
+        teacher_id: 2,
+        lesson_date: lessonDateTime,
+        duration: duration,
+        remark: `${confirmRole}确认`,
+        confirmed_by: confirmType
+      });
+      
+      // 关闭弹窗并刷新数据
+      setSecondConfirmVisible(false);
+      setConfirmModalVisible(false);
+      setIsCompleted(true);
+      setDuration(2);
+      fetchStats();
+      
+      Alert.alert(
+        language === 'zh' ? '确认成功' : 'Confirmed',
+        language === 'zh' 
+          ? `${confirmRole}确认成功，已${isCompleted ? '上课' : '请假'}${duration}课时，课时已扣除`
+          : `${confirmRole} confirmed: ${duration} lesson(s) recorded and deducted`
+      );
+    } catch (error) {
+      console.error('Failed to confirm lesson:', error);
+      Alert.alert(
+        language === 'zh' ? '确认失败' : 'Error',
+        language === 'zh' ? '请重试' : 'Please try again'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const openConfirmModal = () => {
