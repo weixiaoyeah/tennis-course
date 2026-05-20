@@ -62,6 +62,24 @@ export default function RecordsScreen() {
   const remainingLessons = totalLessons - usedLessons;
   const progressPercent = totalLessons > 0 ? Math.round((usedLessons / totalLessons) * 100) : 0;
 
+  const getConfirmBadge = (confirmed_by?: string) => {
+    if (!confirmed_by) return null;
+    
+    const isCoach = confirmed_by === 'coach';
+    return (
+      <View className={`${isCoach ? 'bg-purple-100' : 'bg-blue-100'} px-2 py-0.5 rounded-full flex-row items-center`}>
+        <FontAwesome6 
+          name={isCoach ? 'user-tie' : 'book'} 
+          size={8} 
+          color={isCoach ? '#9333ea' : '#2563eb'} 
+        />
+        <Text className={`text-xs ml-1 font-medium ${isCoach ? 'text-purple-600' : 'text-blue-600'}`}>
+          {isCoach ? (language === 'zh' ? '教练' : 'Coach') : (language === 'zh' ? '学生' : 'Student')}
+        </Text>
+      </View>
+    );
+  };
+
   const renderItem = ({ item }: { item: LessonRecord }) => (
     <View className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 mb-2 shadow-sm border border-green-100">
       <View className="flex-row items-center justify-between">
@@ -70,7 +88,10 @@ export default function RecordsScreen() {
             <FontAwesome6 name="circle-check" size={16} color="white" />
           </View>
           <View className="flex-1">
-            <Text className="text-sm font-bold text-gray-800">{item.lesson_date}</Text>
+            <View className="flex-row items-center flex-wrap gap-1.5">
+              <Text className="text-sm font-bold text-gray-800">{item.lesson_date}</Text>
+              {getConfirmBadge(item.confirmed_by)}
+            </View>
             <Text className="text-xs text-gray-500 mt-0.5 flex-row items-center">
               <FontAwesome6 name="user-tie" size={10} color="#9ca3af" /> {language === 'zh' ? '教练' : 'Coach'}: {getTeacherName(item.teacher_id)}
             </Text>

@@ -25,6 +25,7 @@ export interface LessonRecord {
   lesson_date: string;
   duration: number;
   remark?: string;
+  confirmed_by?: string;
   created_at: string;
   teachers?: { name: string };
   course_packages?: { name: string };
@@ -152,7 +153,7 @@ export const lessonsApi = {
     return res.json();
   },
   
-  create: async (data: { course_package_id: number; teacher_id?: number; lesson_date: string; duration: number; remark?: string }): Promise<LessonRecord> => {
+  create: async (data: { course_package_id: number; teacher_id?: number; lesson_date: string; duration: number; remark?: string; confirmed_by?: string }): Promise<LessonRecord> => {
     const res = await fetch(`${API_BASE}/lessons`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
