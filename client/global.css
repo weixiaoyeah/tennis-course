@@ -71,13 +71,28 @@
       --focus: var(--accent);
       --link: var(--foreground);
 
-      /* Shadows - 更柔和的阴影 */
-      --surface-shadow:
-        0 4px 12px 0 rgba(249, 115, 22, 0.08), 0 2px 4px 0 rgba(0, 0, 0, 0.04);
-      --overlay-shadow:
-        0 8px 24px 0 rgba(249, 115, 22, 0.12), 0 4px 8px 0 rgba(0, 0, 0, 0.06);
-      --field-shadow:
-        0 2px 8px 0 rgba(249, 115, 22, 0.06), 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+      /* Mobile-first compact styles */
+@layer components {
+  /* 紧凑的页面容器 */
+  .page-container {
+    @apply min-h-screen px-3 pt-2 pb-4;
+  }
+  
+  /* 紧凑的卡片 */
+  .card-compact {
+    @apply p-4 rounded-2xl;
+  }
+  
+  /* 紧凑的统计数字 */
+  .stat-number {
+    @apply text-3xl font-bold;
+  }
+  
+  /* 紧凑的列表项 */
+  .list-item {
+    @apply py-2 px-3;
+  }
+}
     }
 
     @variant dark {

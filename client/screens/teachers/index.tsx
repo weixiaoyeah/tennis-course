@@ -101,34 +101,31 @@ export default function TeachersScreen() {
   };
 
   const renderItem = ({ item }: { item: Teacher }) => (
-    <View className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 mb-3 shadow-md border border-orange-100">
+    <View className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-3 mb-2 shadow-sm border border-orange-100">
       <View className="flex-row items-center">
-        <View className="w-14 h-14 bg-gradient-to-br from-orange-400 to-amber-400 rounded-2xl items-center justify-center shadow-md">
-          <FontAwesome6 name="user-tie" size={24} color="white" />
+        <View className="w-11 h-11 bg-gradient-to-br from-orange-400 to-amber-400 rounded-xl items-center justify-center shadow-sm">
+          <FontAwesome6 name="user-tie" size={18} color="white" />
         </View>
-        <View className="flex-1 ml-3">
-          <Text className="text-lg font-bold text-gray-800">{item.name}</Text>
+        <View className="flex-1 ml-2.5">
+          <Text className="text-base font-bold text-gray-800">{item.name}</Text>
           {item.phone && (
-            <Text className="text-sm text-gray-500 mt-1 flex-row items-center">
-              <FontAwesome6 name="phone" size={12} color="#9ca3af" /> {item.phone}
+            <Text className="text-xs text-gray-500 mt-0.5 flex-row items-center">
+              <FontAwesome6 name="phone" size={10} color="#9ca3af" /> {item.phone}
             </Text>
-          )}
-          {item.remark && (
-            <Text className="text-sm text-gray-400 mt-1" numberOfLines={2}>{item.remark}</Text>
           )}
         </View>
         <View className="flex-row">
           <TouchableOpacity 
-            className="w-10 h-10 bg-blue-100 rounded-xl items-center justify-center mr-2 shadow-sm"
+            className="w-9 h-9 bg-blue-100 rounded-lg items-center justify-center mr-1.5"
             onPress={() => handleEdit(item)}
           >
-            <FontAwesome6 name="pencil" size={16} color="#3B82F6" />
+            <FontAwesome6 name="pencil" size={14} color="#3B82F6" />
           </TouchableOpacity>
           <TouchableOpacity 
-            className="w-10 h-10 bg-red-100 rounded-xl items-center justify-center shadow-sm"
+            className="w-9 h-9 bg-red-100 rounded-lg items-center justify-center"
             onPress={() => handleDelete(item)}
           >
-            <FontAwesome6 name="trash" size={16} color="#EF4444" />
+            <FontAwesome6 name="trash" size={14} color="#EF4444" />
           </TouchableOpacity>
         </View>
       </View>
@@ -139,39 +136,39 @@ export default function TeachersScreen() {
     <Screen>
       <View className="flex-1">
         {/* Header */}
-        <View className="px-4 pt-4 pb-2 flex-row justify-between items-center">
+        <View className="px-3 pt-2 pb-1.5 flex-row justify-between items-center">
           <View className="flex-row items-center">
-            <View className="bg-gradient-to-br from-orange-400 to-amber-400 p-2.5 rounded-xl mr-3">
-              <FontAwesome6 name="user-tie" size={22} color="white" />
+            <View className="bg-gradient-to-br from-orange-400 to-amber-400 p-2 rounded-xl mr-2.5">
+              <FontAwesome6 name="user-tie" size={18} color="white" />
             </View>
             <View>
-              <Text className="text-2xl font-bold text-gray-800">{t('teachers.title')}</Text>
-              <Text className="text-sm text-orange-500 mt-0.5">
-                {language === 'zh' ? '管理网球教练信息' : 'Manage tennis coach info'}
+              <Text className="text-lg font-bold text-gray-800">{t('teachers.title')}</Text>
+              <Text className="text-xs text-orange-500">
+                {language === 'zh' ? '管理教练信息' : 'Manage coaches'}
               </Text>
             </View>
           </View>
-          <View className="flex-row items-center gap-2">
+          <View className="flex-row items-center gap-1.5">
             <TouchableOpacity 
               onPress={toggleLanguage}
-              className="bg-gradient-to-r from-orange-400 to-amber-400 px-4 py-2 rounded-full shadow-md"
+              className="bg-gradient-to-r from-orange-400 to-amber-400 px-2.5 py-1.5 rounded-full"
             >
-              <Text className="text-white text-sm font-semibold">
+              <Text className="text-white text-xs font-semibold">
                 {language === 'zh' ? 'EN' : '中'}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity 
-              className="bg-gradient-to-r from-orange-500 to-amber-500 px-4 py-2 rounded-full shadow-lg"
+              className="bg-gradient-to-r from-orange-500 to-amber-500 px-3 py-1.5 rounded-full shadow-lg"
               onPress={handleAdd}
             >
-              <Text className="text-white font-bold">+ {t('buttons.add')}</Text>
+              <Text className="text-white text-xs font-bold">+ {t('buttons.add')}</Text>
             </TouchableOpacity>
           </View>
         </View>
 
         {/* List */}
         <FlatList
-          className="flex-1 px-4 pt-2"
+          className="flex-1 px-3 pt-1"
           data={teachers}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
