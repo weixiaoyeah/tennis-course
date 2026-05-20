@@ -247,6 +247,9 @@ export default function DashboardScreen() {
                 {stats?.next_schedule ? (
                   <>
                     {getDayName(language)} {formatScheduleDate(stats.next_schedule.schedule_date, language)} {stats.next_schedule.schedule_time}
+                    <Text className="text-yellow-400 text-sm font-bold ml-2">
+                      ({stats.next_schedule.duration}{language === 'zh' ? '课时' : 'lessons'})
+                    </Text>
                   </>
                 ) : (
                   language === 'zh' ? '暂无课程计划' : 'No Schedule'
@@ -266,15 +269,6 @@ export default function DashboardScreen() {
                 <FontAwesome6 name="book" size={12} color="white" />
                 <Text className="text-white/90 text-xs ml-1.5">
                   {language === 'zh' ? '学生' : 'Student'}: Book
-                </Text>
-              </View>
-            </View>
-
-            {/* Lessons Badge */}
-            <View className="flex-row justify-center mb-3">
-              <View className="bg-yellow-400 px-2.5 py-1 rounded-full">
-                <Text className="text-gray-900 text-xs font-bold">
-                  {stats?.next_schedule?.duration || 2} {language === 'zh' ? '课时' : 'lessons'}
                 </Text>
               </View>
             </View>
