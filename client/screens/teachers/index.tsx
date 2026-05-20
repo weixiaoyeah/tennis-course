@@ -85,7 +85,11 @@ export default function TeachersScreen() {
     setSaving(true);
     try {
       if (editingTeacher) {
-        await teachersApi.update(editingTeacher.id, formData);
+        // 只更新名字和电话
+        await teachersApi.update(editingTeacher.id, { 
+          name: formData.name, 
+          phone: formData.phone 
+        });
         Toast.show({ type: 'success', text1: t('messages.updateSuccess') });
       } else {
         await teachersApi.create(formData);
@@ -116,16 +120,10 @@ export default function TeachersScreen() {
         </View>
         <View className="flex-row">
           <TouchableOpacity 
-            className="w-9 h-9 bg-blue-100 rounded-lg items-center justify-center mr-1.5"
+            className="w-9 h-9 bg-blue-100 rounded-lg items-center justify-center"
             onPress={() => handleEdit(item)}
           >
             <FontAwesome6 name="pencil" size={14} color="#3B82F6" />
-          </TouchableOpacity>
-          <TouchableOpacity 
-            className="w-9 h-9 bg-red-100 rounded-lg items-center justify-center"
-            onPress={() => handleDelete(item)}
-          >
-            <FontAwesome6 name="trash" size={14} color="#EF4444" />
           </TouchableOpacity>
         </View>
       </View>
@@ -238,16 +236,18 @@ export default function TeachersScreen() {
                   />
                 </View>
 
-                <View>
-                  <Text className="text-sm font-semibold text-gray-700 mb-2">{t('teachers.remark')}</Text>
-                  <TextInput
-                    className="bg-white border-2 border-orange-100 rounded-xl px-4 py-3 text-gray-800 shadow-sm"
-                    multiline
-                    numberOfLines={3}
-                    value={formData.remark}
-                    onChangeText={(text) => setFormData({ ...formData, remark: text })}
-                  />
-                </View>
+                {!editingTeacher && (
+                  <View>
+                    <Text className="text-sm font-semibold text-gray-700 mb-2">{t('teachers.remark')}</Text>
+                    <TextInput
+                      className="bg-white border-2 border-orange-100 rounded-xl px-4 py-3 text-gray-800 shadow-sm"
+                      multiline
+                      numberOfLines={3}
+                      value={formData.remark}
+                      onChangeText={(text) => setFormData({ ...formData, remark: text })}
+                    />
+                  </View>
+                )}
 
                 <TouchableOpacity
                   className={`bg-accent rounded-xl py-4 mt-4 ${saving ? 'opacity-50' : ''}`}

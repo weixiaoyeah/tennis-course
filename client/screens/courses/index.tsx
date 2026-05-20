@@ -68,7 +68,9 @@ export default function CoursesScreen() {
         {item.start_date && (
           <View className="bg-white/70 px-2.5 py-1 rounded-lg flex-row items-center">
             <FontAwesome6 name="calendar-days" size={10} color="#8b5cf6" />
-            <Text className="text-xs text-violet-600 font-medium ml-1.5">{item.start_date}</Text>
+            <Text className="text-xs text-violet-600 font-medium ml-1.5">
+              {language === 'zh' ? '有效期' : 'Valid'} {item.start_date} - 2027.4.1
+            </Text>
           </View>
         )}
       </View>

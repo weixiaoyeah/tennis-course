@@ -56,6 +56,12 @@ export default function RecordsScreen() {
     return teacher?.name || '-';
   };
 
+  // 计算课时统计
+  const totalLessons = courses.reduce((sum, c) => sum + (c.total_lessons || 0), 0);
+  const usedLessons = records.reduce((sum, r) => sum + (r.duration || 0), 0);
+  const remainingLessons = totalLessons - usedLessons;
+  const progressPercent = totalLessons > 0 ? Math.round((usedLessons / totalLessons) * 100) : 0;
+
   const renderItem = ({ item }: { item: LessonRecord }) => (
     <View className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-3 mb-2 shadow-sm border border-green-100">
       <View className="flex-row items-center justify-between">
@@ -105,6 +111,37 @@ export default function RecordsScreen() {
               {language === 'zh' ? 'EN' : '中'}
             </Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Progress Card */}
+        <View className="px-3 pt-1 pb-2">
+          <View className="bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl p-4 shadow-lg">
+            <View className="flex-row justify-between items-center mb-3">
+              <Text className="text-white font-bold text-sm">
+                {language === 'zh' ? '课时进度' : 'Progress'}
+              </Text>
+              <Text className="text-white/80 text-xs">
+                {usedLessons}/{totalLessons} {language === 'zh' ? '课时' : 'lessons'}
+              </Text>
+            </View>
+            <View className="bg-white/30 rounded-full h-3 mb-2">
+              <View 
+                className="bg-white rounded-full h-3" 
+                style={{ width: `${progressPercent}%` }} 
+              />
+            </View>
+            <View className="flex-row justify-between items-center">
+              <Text className="text-white/90 text-xs">
+                {language === 'zh' ? '已完成' : 'Completed'}: {usedLessons}
+              </Text>
+              <Text className="text-white font-bold text-lg">
+                {remainingLessons}
+              </Text>
+              <Text className="text-white/90 text-xs">
+                {language === 'zh' ? '剩余课时' : 'Remaining'}
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* List */}
