@@ -88,8 +88,8 @@ export default function RecordsScreen() {
     const isCoach = confirmed_by === 'coach';
     return (
       <View className={`flex-row items-center ${isCoach 
-        ? 'bg-gradient-to-r from-violet-500 to-purple-500' 
-        : 'bg-gradient-to-r from-blue-500 to-cyan-500'} px-2 py-0.5 rounded-full shadow-sm`}>
+        ? 'bg-gradient-to-r from-sky-500 to-blue-600' 
+        : 'bg-gradient-to-r from-emerald-400 to-green-600'} px-2 py-0.5 rounded-full shadow-sm`}>
         <FontAwesome6 
           name={isCoach ? 'user-tie' : 'graduation-cap'} 
           size={9} 

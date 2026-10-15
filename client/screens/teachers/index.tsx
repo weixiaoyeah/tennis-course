@@ -132,8 +132,8 @@ export default function TeachersScreen() {
                 </Text>
               </View>
               <View className="flex-row items-center bg-white/80 rounded-md px-2 py-0.5">
-                <FontAwesome6 name="clock" size={9} color="#8b5cf6" />
-                <Text className="text-purple-500 text-xs font-semibold ml-1">
+                <FontAwesome6 name="clock" size={9} color="#22c55e" />
+                <Text className="text-emerald-600 text-xs font-semibold ml-1">
                   {stats.totalDuration}{language === 'zh' ? '课时' : ''}
                 </Text>
               </View>
@@ -161,7 +161,7 @@ export default function TeachersScreen() {
               </View>
               <View className="w-px bg-orange-100" />
               <View className="items-center">
-                <Text className="text-xl font-black text-purple-500">{stats.totalDuration}</Text>
+                <Text className="text-xl font-black text-emerald-600">{stats.totalDuration}</Text>
                 <Text className="text-xs text-gray-500 mt-0.5">
                   {language === 'zh' ? '总课时(课时)' : 'Duration'}
                 </Text>

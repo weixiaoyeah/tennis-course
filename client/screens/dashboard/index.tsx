@@ -239,7 +239,7 @@ export default function DashboardScreen() {
 
         {/* Course Schedule Card */}
         <View className="px-3 pb-4">
-          <View className="bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-500 rounded-2xl p-4 shadow-md">
+          <View className="bg-gradient-to-br from-sky-400 via-blue-500 to-emerald-500 rounded-2xl p-4 shadow-md">
             <View className="flex-row items-center mb-3">
               <View className="bg-white/25 p-2 rounded-lg mr-2.5">
                 <FontAwesome6 name="calendar" size={18} color="white" />
@@ -259,7 +259,7 @@ export default function DashboardScreen() {
                       <Text className="text-white text-base font-bold">
                         {getDayName(schedule.schedule_date, language)} {formatScheduleDate(schedule.schedule_date, language)} {schedule.schedule_time}
                       </Text>
-                      <Text className="text-yellow-400 text-sm font-bold">
+                      <Text className="text-emerald-300 text-sm font-bold">
                         ({schedule.duration}{language === 'zh' ? '课时' : 'lessons'})
                       </Text>
                     </View>
@@ -429,7 +429,7 @@ export default function DashboardScreen() {
                   setSecondConfirmVisible(true);
                 }}
                 disabled={submitting}
-                className="flex-1 py-3 rounded-xl items-center mr-1.5 bg-gradient-to-r from-violet-500 to-purple-500"
+                className="flex-1 py-3 rounded-xl items-center mr-1.5 bg-gradient-to-r from-sky-500 to-blue-600"
               >
                 <Text className="text-white font-bold text-sm">
                   {language === 'zh' ? '教练确认' : 'Coach'}
@@ -441,7 +441,7 @@ export default function DashboardScreen() {
                   setSecondConfirmVisible(true);
                 }}
                 disabled={submitting}
-                className="flex-1 py-3 rounded-xl items-center ml-1.5 bg-gradient-to-r from-blue-500 to-cyan-500"
+                className="flex-1 py-3 rounded-xl items-center ml-1.5 bg-gradient-to-r from-emerald-400 to-green-600"
               >
                 <Text className="text-white font-bold text-sm">
                   {language === 'zh' ? '学生确认' : 'Student'}
@@ -501,8 +501,8 @@ export default function DashboardScreen() {
             <View className="items-center mb-5">
               <View className={`px-4 py-1.5 rounded-full ${
                 pendingConfirmRole === 'coach' 
-                  ? 'bg-gradient-to-r from-violet-500 to-purple-500' 
-                  : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                  ? 'bg-gradient-to-r from-sky-500 to-blue-600' 
+                  : 'bg-gradient-to-r from-emerald-400 to-green-600'
               }`}>
                 <Text className="text-white font-semibold text-sm">
                   {pendingConfirmRole === 'coach' 
@@ -524,8 +524,8 @@ export default function DashboardScreen() {
               disabled={submitting}
               className={`py-3 rounded-xl items-center mb-2 ${
                 pendingConfirmRole === 'coach' 
-                  ? 'bg-gradient-to-r from-violet-500 to-purple-500' 
-                  : 'bg-gradient-to-r from-blue-500 to-cyan-500'
+                  ? 'bg-gradient-to-r from-sky-500 to-blue-600' 
+                  : 'bg-gradient-to-r from-emerald-400 to-green-600'
               }`}
             >
               <Text className="text-white font-bold text-sm">
