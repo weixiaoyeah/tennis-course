@@ -78,6 +78,7 @@ export interface Stats {
   total_records: number;
   package_stats: CoursePackageStats[];
   next_schedule?: CourseSchedule;
+  upcoming_schedules?: CourseSchedule[];
 }
 
 // 老师 API

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal, Alert, Platform } from 'react-native';
 import { Screen } from '@/components/Screen';
-import { statsApi, lessonsApi, type Stats } from '@/services/api';
+import { statsApi, lessonsApi, type Stats, type CourseSchedule } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
@@ -45,6 +45,7 @@ export default function DashboardScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [pendingConfirmRole, setPendingConfirmRole] = useState<'coach' | 'student' | null>(null);
   const [secondConfirmVisible, setSecondConfirmVisible] = useState(false);
+  const [selectedSchedule, setSelectedSchedule] = useState<CourseSchedule | null>(null);
   const { t, language, toggleLanguage } = useTranslation();
 
   const fetchStats = useCallback(async () => {
@@ -75,8 +76,8 @@ export default function DashboardScreen() {
     
     setSubmitting(true);
     try {
-      // 如果没有下次课程计划，提示用户
-      if (!stats?.next_schedule) {
+      // 如果没有选中的课程计划，提示用户
+      if (!selectedSchedule) {
         Alert.alert(
           language === 'zh' ? '无可确认课程' : 'No Schedule',
           language === 'zh' ? '当前没有待确认的课程计划' : 'No pending course schedule'
@@ -91,7 +92,7 @@ export default function DashboardScreen() {
       
       // 调用确认API
       await lessonsApi.confirmSchedule({
-        schedule_id: stats.next_schedule.id,
+        schedule_id: selectedSchedule.id,
         confirmed_by: confirmType,
         is_attended: isCompleted,
         duration: duration
@@ -125,9 +126,10 @@ export default function DashboardScreen() {
     }
   };
 
-  const openConfirmModal = () => {
+  const openConfirmModal = (schedule: CourseSchedule) => {
     setIsCompleted(true);
     setDuration(2);
+    setSelectedSchedule(schedule);
     setConfirmModalVisible(true);
   };
 
@@ -144,6 +146,8 @@ export default function DashboardScreen() {
   const remainingPercent = stats && stats.total_lessons > 0 
     ? Math.round((stats.remaining_lessons / stats.total_lessons) * 100) 
     : 0;
+
+  const upcomingSchedules = stats?.upcoming_schedules || [];
 
   return (
     <Screen>
@@ -238,56 +242,61 @@ export default function DashboardScreen() {
                 <FontAwesome6 name="calendar" size={18} color="white" />
               </View>
               <Text className="text-base font-bold text-white">
-                {language === 'zh' ? '下次课程' : 'Next Lesson'}
+                {language === 'zh' ? '下周课程' : 'Upcoming Lessons'}
               </Text>
             </View>
             
-            {/* Date Display */}
-            <View className="bg-white/15 rounded-xl p-3 mb-2.5">
-              <Text className="text-white/70 text-xs mb-0.5">
-                {language === 'zh' ? '上课时间' : 'Time'}
-              </Text>
-              <Text className="text-white text-lg font-bold">
-                {stats?.next_schedule ? (
-                  <>
-                    {getDayName(stats.next_schedule.schedule_date, language)} {formatScheduleDate(stats.next_schedule.schedule_date, language)} {stats.next_schedule.schedule_time}
-                    <Text className="text-yellow-400 text-sm font-bold ml-2">
-                      ({stats.next_schedule.duration}{language === 'zh' ? '课时' : 'lessons'})
+            {/* Upcoming schedules list */}
+            {upcomingSchedules.length > 0 ? (
+              upcomingSchedules.map((schedule, index) => (
+                <View key={schedule.id}>
+                  {/* Schedule Item */}
+                  <View className="bg-white/15 rounded-xl p-3 mb-2">
+                    <View className="flex-row justify-between items-center mb-1">
+                      <Text className="text-white text-base font-bold">
+                        {getDayName(schedule.schedule_date, language)} {formatScheduleDate(schedule.schedule_date, language)} {schedule.schedule_time}
+                      </Text>
+                      <Text className="text-yellow-400 text-sm font-bold">
+                        ({schedule.duration}{language === 'zh' ? '课时' : 'lessons'})
+                      </Text>
+                    </View>
+
+                    <View className="flex-row justify-between">
+                      <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 mr-2">
+                        <FontAwesome6 name="user-tie" size={12} color="white" />
+                        <Text className="text-white/90 text-xs ml-1.5">
+                          {language === 'zh' ? '教练' : 'Coach'}: {schedule.teacher?.name || 'Hany'}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 ml-2">
+                        <FontAwesome6 name="book" size={12} color="white" />
+                        <Text className="text-white/90 text-xs ml-1.5">
+                          {language === 'zh' ? '学生' : 'Student'}: Book
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+
+                  {/* Confirm Button (only on last item, or per item) */}
+                  <TouchableOpacity 
+                    onPress={() => openConfirmModal(schedule)}
+                    className="bg-white/25 py-2.5 rounded-xl items-center mb-2.5"
+                    activeOpacity={0.8}
+                  >
+                    <Text className="text-white font-bold text-sm">
+                      {language === 'zh' ? `确认 ${getDayName(schedule.schedule_date, language)} 课程` : `Confirm ${getDayName(schedule.schedule_date, language)} Lesson`}
                     </Text>
-                  </>
-                ) : (
-                  language === 'zh' ? '暂无课程计划' : 'No Schedule'
-                )}
+                  </TouchableOpacity>
+                  {index < upcomingSchedules.length - 1 && (
+                    <View className="h-px bg-white/20 my-2" />
+                  )}
+                </View>
+              ))
+            ) : (
+              <Text className="text-white/80 text-sm text-center py-2">
+                {language === 'zh' ? '暂无即将开始的课程计划' : 'No upcoming schedules'}
               </Text>
-            </View>
-
-            {/* Info Row */}
-            <View className="flex-row justify-between mb-2.5">
-              <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 mr-2">
-                <FontAwesome6 name="user-tie" size={12} color="white" />
-                <Text className="text-white/90 text-xs ml-1.5">
-                  {language === 'zh' ? '教练' : 'Coach'}: {stats?.next_schedule?.teacher?.name || 'Hany'}
-                </Text>
-              </View>
-              <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 ml-2">
-                <FontAwesome6 name="book" size={12} color="white" />
-                <Text className="text-white/90 text-xs ml-1.5">
-                  {language === 'zh' ? '学生' : 'Student'}: Book
-                </Text>
-              </View>
-            </View>
-
-            {/* Confirm Button */}
-            <TouchableOpacity 
-              onPress={openConfirmModal}
-              className="bg-white/25 py-2.5 rounded-xl items-center"
-              activeOpacity={0.8}
-              disabled={!stats?.next_schedule}
-            >
-              <Text className="text-white font-bold text-sm">
-                {language === 'zh' ? '上课确认' : 'Confirm Lesson'}
-              </Text>
-            </TouchableOpacity>
+            )}
           </View>
         </View>
       </ScrollView>
@@ -325,13 +334,13 @@ export default function DashboardScreen() {
             {/* Course Info */}
             <View className="bg-gray-50 rounded-xl p-3 mb-4">
               <Text className="text-sm text-gray-600 mb-1">
-                {stats?.next_schedule 
-                  ? `${getDayName(stats.next_schedule.schedule_date, language)} ${formatScheduleDate(stats.next_schedule.schedule_date, language)} ${stats.next_schedule.schedule_time}`
+                {selectedSchedule 
+                  ? `${getDayName(selectedSchedule.schedule_date, language)} ${formatScheduleDate(selectedSchedule.schedule_date, language)} ${selectedSchedule.schedule_time}`
                   : (language === 'zh' ? '暂无课程计划' : 'No Schedule')
                 }
               </Text>
               <Text className="text-xs text-gray-400">
-                {language === 'zh' ? '教练' : 'Coach'}: {stats?.next_schedule?.teacher?.name || 'Hany'} | {language === 'zh' ? '学生' : 'Student'}: Book
+                {language === 'zh' ? '教练' : 'Coach'}: {selectedSchedule?.teacher?.name || 'Hany'} | {language === 'zh' ? '学生' : 'Student'}: Book
               </Text>
             </View>
 

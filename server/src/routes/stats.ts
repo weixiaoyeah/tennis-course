@@ -36,28 +36,31 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: teachersError.message });
     }
     
-    // 获取最近一次未确认的课程计划
-    const { data: nextSchedule, error: scheduleError } = await client
+    // 获取最近两次即将上的未确认课程计划（从今天开始，按日期升序）
+    const today = new Date().toISOString().slice(0, 10);
+    const { data: nextSchedules, error: scheduleError } = await client
       .from('course_schedules')
       .select('*')
       .eq('status', 'pending')
+      .gte('schedule_date', today)
       .order('schedule_date', { ascending: true })
-      .limit(1);
+      .limit(2);
     
     if (scheduleError) {
-      console.error('Error fetching next schedule:', scheduleError);
+      console.error('Error fetching upcoming schedules:', scheduleError);
     }
+    const nextSchedule = nextSchedules || [];
     
     // 计算统计 - 只计算有confirmed_by的记录（已确认的上课）
     const totalLessons = packages?.reduce((sum: number, p: { total_lessons?: number }) => sum + (p.total_lessons || 0), 0) || 0;
     const usedLessons = records?.reduce((sum: number, r: { duration?: number }) => sum + (r.duration || 0), 0) || 0;
     const remainingLessons = totalLessons - usedLessons;
     
-    // 查找对应的教练信息
-    const nextScheduleWithTeacher = nextSchedule?.[0] ? {
-      ...nextSchedule[0],
-      teacher: teachers?.find((t: { id: number }) => t.id === nextSchedule[0].teacher_id)
-    } : null;
+    // 查找即将上课的教练信息
+    const upcomingSchedules = nextSchedule.map((s: any) => ({
+      ...s,
+      teacher: teachers?.find((t: { id: number }) => t.id === s.teacher_id)
+    }));
     
     // 各课程包统计
     const packageStats = (packages || []).map((pkg: { id: number; name: string; total_lessons: number; teacher_id?: number }) => {
@@ -81,7 +84,8 @@ router.get('/', async (req, res) => {
       total_teachers: teachers?.length || 0,
       total_records: records?.length || 0,
       package_stats: packageStats,
-      next_schedule: nextScheduleWithTeacher,
+      next_schedule: upcomingSchedules[0] || null,
+      upcoming_schedules: upcomingSchedules,
     });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
