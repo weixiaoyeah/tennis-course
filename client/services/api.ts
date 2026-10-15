@@ -199,10 +199,10 @@ export const lessonsApi = {
   // 确认课程计划
   confirmSchedule: async (data: { 
     schedule_id: number; 
-    is_completed: boolean; 
+    is_attended: boolean; 
     duration: number; 
     confirmed_by?: 'coach' | 'student' 
-  }): Promise<{ success: boolean; message: string }> => {
+  }): Promise<LessonRecord> => {
     const res = await fetch(`${API_BASE}/lessons/confirm-schedule`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

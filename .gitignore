@@ -14,3 +14,7 @@ node-compile-cache/
 .codegraph
 !backups/README*.md
 !backups/*.json
+
+# 环境变量（敏感，勿提交）
+.env
+*.env

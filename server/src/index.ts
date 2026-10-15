@@ -6,10 +6,14 @@ import lessonsRouter from './routes/lessons';
 import statsRouter from './routes/stats';
 
 const app = express();
-const port = process.env.PORT || 9091;
+const port: number = Number(process.env.PORT) || 9091;
 
-// Middleware
-app.use(cors());
+// CORS 配置 - 允许前端访问
+app.use(cors({
+  origin: ['http://115.190.216.16:3000', 'http://localhost:3000'],
+  credentials: true
+}));
+
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -25,6 +29,6 @@ app.use('/api/v1/courses', coursesRouter);
 app.use('/api/v1/lessons', lessonsRouter);
 app.use('/api/v1/stats', statsRouter);
 
-app.listen(port, () => {
-  console.log(`Server listening at http://localhost:${port}/`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`Server listening at http://0.0.0.0:${port}/`);
 });
