@@ -137,11 +137,6 @@ export default function TeachersScreen() {
                   {stats.totalDuration}{language === 'zh' ? '课时' : ''}
                 </Text>
               </View>
-              {item.phone && (
-                <Text className="text-xs text-gray-400 ml-1.5 flex-row items-center">
-                  <FontAwesome6 name="phone" size={9} color="#9ca3af" /> {item.phone}
-                </Text>
-              )}
             </View>
           </View>
           <View className="w-7 h-7 bg-white/70 rounded-full items-center justify-center">
