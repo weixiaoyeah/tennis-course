@@ -1,10 +1,20 @@
 import { Router } from 'express';
 import { getSupabaseClient } from '../storage/database/supabase-client';
 import { lesson_records, insertLessonRecordSchema } from '../storage/database/shared/schema';
+import dayjs from 'dayjs';
+
+// 解析课程时间字符串为可排序的时间戳（格式如 "2026-10-10 10:00-12:00" 或 "2026/5/16 10:00-12:00"）
+function parseLessonDate(lessonDate: string): number {
+  // 提取日期与起始时间
+  const match = lessonDate && lessonDate.match(/^(\d{4}[\/-]\d{1,2}[\/-]\d{1,2})\s+(\d{1,2}:\d{2})/);
+  if (!match) return 0;
+  const datePart = match[1].replace(/\//g, '-');
+  return dayjs(`${datePart} ${match[2]}`).valueOf() || 0;
+}
 
 const router = Router();
 
-// 获取所有上课记录（可按课程包筛选）
+// 获取所有上课记录（可按课程包筛选，按上课时间从近到远排序）
 router.get('/', async (req, res) => {
   try {
     const { course_package_id } = req.query;
@@ -12,8 +22,7 @@ router.get('/', async (req, res) => {
     
     let query = client
       .from('lesson_records')
-      .select('*, teachers(name), course_packages(name)')
-      .order('created_at', { ascending: false });
+      .select('*, teachers(name), course_packages(name)');
     
     if (course_package_id) {
       query = query.eq('course_package_id', parseInt(course_package_id as string));
@@ -25,7 +34,12 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    res.json(data);
+    // 按上课时间从近到远排序（避免字符串格式不一致导致排序错误）
+    const sorted = (data || []).sort((a: any, b: any) => 
+      parseLessonDate(b.lesson_date) - parseLessonDate(a.lesson_date)
+    );
+    
+    res.json(sorted);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
