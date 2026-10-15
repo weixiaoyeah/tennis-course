@@ -23,6 +23,7 @@ export interface Teacher {
   name: string;
   phone?: string;
   remark?: string;
+  avatar_url?: string;
   created_at: string;
 }
 

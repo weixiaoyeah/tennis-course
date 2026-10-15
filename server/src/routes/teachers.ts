@@ -1,8 +1,31 @@
 import { Router } from 'express';
 import { getSupabaseClient } from '../storage/database/supabase-client';
 import { teachers, insertTeacherSchema } from '../storage/database/shared/schema';
+import { S3Storage } from 'coze-coding-dev-sdk';
 
 const router = Router();
+
+const storage = new S3Storage({
+  endpointUrl: process.env.COZE_BUCKET_ENDPOINT_URL,
+  accessKey: '',
+  secretKey: '',
+  bucketName: process.env.COZE_BUCKET_NAME,
+  region: 'cn-beijing',
+});
+
+async function withAvatarUrl(row: any) {
+  if (!row) return row;
+  const { avatar_key, ...rest } = row;
+  let avatar_url: string | null = null;
+  if (avatar_key) {
+    try {
+      avatar_url = await storage.generatePresignedUrl({ key: avatar_key, expireTime: 31536000 });
+    } catch {
+      avatar_url = null;
+    }
+  }
+  return { ...rest, avatar_url };
+}
 
 // 获取所有老师
 router.get('/', async (req, res) => {
@@ -17,7 +40,8 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: error.message });
     }
     
-    res.json(data);
+    const mapped = await Promise.all(data.map((row) => withAvatarUrl(row)));
+    res.json(mapped);
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }
@@ -42,7 +66,7 @@ router.get('/:id', async (req, res) => {
       return res.status(404).json({ error: '老师不存在' });
     }
     
-    res.json(data);
+    res.json(await withAvatarUrl(data));
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

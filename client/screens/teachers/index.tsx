@@ -5,6 +5,7 @@ import { teachersApi, lessonsApi, type Teacher, type LessonRecord } from '@/serv
 import { useFocusEffect } from 'expo-router';
 import Toast from 'react-native-toast-message';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useTranslation } from '@/i18n';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -118,8 +119,12 @@ export default function TeachersScreen() {
           activeOpacity={0.7}
           onPress={() => fetchTeacherLessons(item.id)}
         >
-          <View className="w-11 h-11 bg-gradient-to-br from-orange-400 to-amber-400 rounded-xl items-center justify-center shadow-sm">
-            <FontAwesome6 name="user-tie" size={18} color="white" />
+          <View className="w-12 h-12 rounded-xl overflow-hidden bg-sky-100 shadow-sm items-center justify-center">
+            {item.avatar_url ? (
+              <Image source={{ uri: item.avatar_url }} style={{ width: 48, height: 48 }} />
+            ) : (
+              <FontAwesome6 name="user-tie" size={18} color="#1e88e5" />
+            )}
           </View>
           <View className="flex-1 ml-2.5">
             <Text className="text-base font-bold text-gray-800">{item.name}</Text>
