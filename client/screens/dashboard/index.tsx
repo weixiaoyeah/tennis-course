@@ -18,9 +18,13 @@ function formatScheduleDate(dateStr: string, language: 'zh' | 'en'): string {
   return `${month}/${day}`;
 }
 
-// 获取星期几
-function getDayName(language: 'zh' | 'en'): string {
-  return language === 'zh' ? '周六' : 'Sat';
+// 获取星期几（根据日期动态计算）
+function getDayName(dateStr: string, language: 'zh' | 'en'): string {
+  const date = new Date(dateStr);
+  const zhWeekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const enWeekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const day = date.getDay();
+  return language === 'zh' ? zhWeekdays[day] : enWeekdays[day];
 }
 
 // 获取确认类型
@@ -246,7 +250,7 @@ export default function DashboardScreen() {
               <Text className="text-white text-lg font-bold">
                 {stats?.next_schedule ? (
                   <>
-                    {getDayName(language)} {formatScheduleDate(stats.next_schedule.schedule_date, language)} {stats.next_schedule.schedule_time}
+                    {getDayName(stats.next_schedule.schedule_date, language)} {formatScheduleDate(stats.next_schedule.schedule_date, language)} {stats.next_schedule.schedule_time}
                     <Text className="text-yellow-400 text-sm font-bold ml-2">
                       ({stats.next_schedule.duration}{language === 'zh' ? '课时' : 'lessons'})
                     </Text>
@@ -322,7 +326,7 @@ export default function DashboardScreen() {
             <View className="bg-gray-50 rounded-xl p-3 mb-4">
               <Text className="text-sm text-gray-600 mb-1">
                 {stats?.next_schedule 
-                  ? `${getDayName(language)} ${formatScheduleDate(stats.next_schedule.schedule_date, language)} ${stats.next_schedule.schedule_time}`
+                  ? `${getDayName(stats.next_schedule.schedule_date, language)} ${formatScheduleDate(stats.next_schedule.schedule_date, language)} ${stats.next_schedule.schedule_time}`
                   : (language === 'zh' ? '暂无课程计划' : 'No Schedule')
                 }
               </Text>
