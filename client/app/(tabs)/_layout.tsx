@@ -3,9 +3,11 @@ import { Platform, ViewStyle } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useCSSVariable } from 'uniwind';
+import { useTranslation } from '@/i18n';
 
 export default function TabLayout() {
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation();
   
   const [background, muted, accent, border] = useCSSVariable([
     '--color-background',
@@ -27,10 +29,10 @@ export default function TabLayout() {
   }
 
   const labels = {
-    home: '首页',
-    teachers: '教练',
-    courses: '课程',
-    records: '记录',
+    home: t('nav.home'),
+    teachers: t('nav.teachers'),
+    courses: t('nav.courses'),
+    records: t('nav.records'),
   };
 
   return (

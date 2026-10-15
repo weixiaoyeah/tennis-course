@@ -1,8 +1,17 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { I18nManager } from 'react-native';
 import { translations, Language, TranslationKeys } from './translations';
 
 const STORAGE_KEY = '@app_language';
+
+// 阿拉伯语需要 RTL 布局
+function applyRTL(lang: Language) {
+  if (I18nManager.isRTL !== (lang === 'ar')) {
+    I18nManager.forceRTL(lang === 'ar');
+    I18nManager.allowRTL(true);
+  }
+}
 
 interface LanguageContextType {
   language: Language;
@@ -31,8 +40,9 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
     const loadLanguage = async () => {
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
-        if (saved === 'zh' || saved === 'en') {
-          setLanguageState(saved);
+        if (saved === 'zh' || saved === 'en' || saved === 'ar') {
+          applyRTL(saved);
+          setLanguageState(saved as Language);
         }
       } catch (error) {
         console.error('Failed to load language:', error);
@@ -47,15 +57,18 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
   const setLanguage = useCallback(async (lang: Language) => {
     try {
       await AsyncStorage.setItem(STORAGE_KEY, lang);
+      applyRTL(lang);
       setLanguageState(lang);
     } catch (error) {
       console.error('Failed to save language:', error);
     }
   }, []);
 
-  // 切换语言
+  // 切换语言（zh -> en -> ar -> zh 循环）
   const toggleLanguage = useCallback(() => {
-    setLanguage(language === 'zh' ? 'en' : 'zh');
+    const order: Language[] = ['zh', 'en', 'ar'];
+    const next = order[(order.indexOf(language) + 1) % order.length];
+    setLanguage(next);
   }, [language, setLanguage]);
 
   // 翻译函数

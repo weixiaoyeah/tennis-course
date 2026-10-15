@@ -12,13 +12,20 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
+// 三语言帮助函数（阿拉伯语 RTL 文字）
+function tr(zh: string, en: string, ar: string, language: string): string {
+  if (language === 'ar') return ar;
+  return language === 'zh' ? zh : en;
+}
+
 // 格式化课程日期
-function formatLessonDate(dateStr: string, language: 'zh' | 'en'): string {
+function formatLessonDate(dateStr: string, language: 'zh' | 'en' | 'ar'): string {
   const match = dateStr && dateStr.match(/^(\d{4}[-/]\d{1,2}[-/]\d{1,2})/);
   if (!match) return dateStr || '';
   const parts = match[1].replace(/\//g, '-').split('-').map(Number);
   const [y, m, d] = parts;
-  return language === 'zh' ? `${m}月${d}日` : `${m}/${d}`;
+  if (language === 'zh') return `${m}月${d}日`;
+  return `${m}/${d}`;
 }
 
 export default function TeachersScreen() {
@@ -139,7 +146,7 @@ export default function TeachersScreen() {
               <View className="flex-row items-center bg-white/80 rounded-md px-2 py-0.5">
                 <FontAwesome6 name="clock" size={9} color="#22c55e" />
                 <Text className="text-emerald-600 text-xs font-semibold ml-1">
-                  {stats.totalDuration}{language === 'zh' ? '课时' : ''}
+                  {stats.totalDuration}{tr('课时', '', 'درس', language)}
                 </Text>
               </View>
             </View>
@@ -161,14 +168,14 @@ export default function TeachersScreen() {
               <View className="items-center">
                 <Text className="text-xl font-black text-orange-500">{stats.totalCount}</Text>
                 <Text className="text-xs text-gray-500 mt-0.5">
-                  {language === 'zh' ? '总次数(次)' : 'Sessions'}
+                  {tr('总次数(次)', 'Sessions', 'الجلسات', language)}
                 </Text>
               </View>
               <View className="w-px bg-orange-100" />
               <View className="items-center">
                 <Text className="text-xl font-black text-emerald-600">{stats.totalDuration}</Text>
                 <Text className="text-xs text-gray-500 mt-0.5">
-                  {language === 'zh' ? '总课时(课时)' : 'Duration'}
+                  {tr('总课时(课时)', 'Duration', 'عدد الدروس', language)}
                 </Text>
               </View>
             </View>
@@ -176,11 +183,11 @@ export default function TeachersScreen() {
             {/* 课程记录列表 */}
             {isLoading ? (
               <View className="py-6 items-center">
-                <Text className="text-gray-400 text-sm">{language === 'zh' ? '加载中...' : 'Loading...'}</Text>
+                <Text className="text-gray-400 text-sm">{tr('加载中...', 'Loading...', 'جار التحميل...', language)}</Text>
               </View>
             ) : teacherLessons.length === 0 ? (
               <View className="py-6 items-center">
-                <Text className="text-gray-400 text-sm">{language === 'zh' ? '暂无上课记录' : 'No lessons yet'}</Text>
+                <Text className="text-gray-400 text-sm">{tr('暂无上课记录', 'No lessons yet', 'لا توجد دروس بعد', language)}</Text>
               </View>
             ) : (
               <View className="px-3 pb-3">
@@ -208,8 +215,8 @@ export default function TeachersScreen() {
                         />
                         <Text className={`text-xs ml-1 ${lesson.confirmed_by ? 'text-green-600' : 'text-gray-500'}`}>
                           {lesson.confirmed_by 
-                            ? `${lesson.duration || 0}${language === 'zh' ? '课时' : 'les'}`
-                            : (language === 'zh' ? '未上课' : 'Absent')
+                            ? `${lesson.duration || 0}${tr('课时', 'les', 'درس', language)}`
+                            : (tr('未上课', 'Absent', 'غائب', language))
                           }
                         </Text>
                       </View>
@@ -252,7 +259,7 @@ export default function TeachersScreen() {
                 </View>
                 <Text className="text-gray-600 font-medium">{t('teachers.noTeachers')}</Text>
                 <Text className="text-sm text-gray-400 mt-1">
-                  {language === 'zh' ? '暂无教练，请联系管理员添加' : 'No teachers available'}
+                  {tr('暂无教练，请联系管理员添加', 'No teachers available', 'لا يوجد مدربون متاحون', language)}
                 </Text>
               </View>
             )

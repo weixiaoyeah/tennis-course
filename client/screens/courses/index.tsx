@@ -6,6 +6,12 @@ import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
 
+// 三语言帮助函数（阿拉伯语 RTL 文字）
+function tr(zh: string, en: string, ar: string, language: string): string {
+  if (language === 'ar') return ar;
+  return language === 'zh' ? zh : en;
+}
+
 export default function CoursesScreen() {
   const [courses, setCourses] = useState<CoursePackage[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -69,7 +75,7 @@ export default function CoursesScreen() {
           <View className="bg-white/70 px-2.5 py-1 rounded-lg flex-row items-center">
             <FontAwesome6 name="calendar-days" size={10} color="#1e88e5" />
             <Text className="text-xs text-sky-600 font-medium ml-1.5">
-              {language === 'zh' ? '有效期' : 'Valid'} {item.start_date} - 2027.4.1
+              {tr('有效期', 'Valid', 'صالح', language)} {item.start_date} - 2027.4.1
             </Text>
           </View>
         )}
@@ -86,7 +92,7 @@ export default function CoursesScreen() {
             <View className="bg-gradient-to-br from-sky-400 to-emerald-500 p-2 rounded-xl mr-2.5">
               <FontAwesome6 name="book" size={18} color="white" />
             </View>
-            <Text className="text-lg font-bold text-gray-800">{language === 'zh' ? '课程包' : 'Courses'}</Text>
+            <Text className="text-lg font-bold text-gray-800">{tr('课程包', 'Courses', 'الدورات', language)}</Text>
           </View>
         </View>
 
@@ -104,7 +110,7 @@ export default function CoursesScreen() {
               <View className="bg-sky-100 p-3 rounded-full mb-2.5">
                 <FontAwesome6 name="folder-open" size={28} color="#1e88e5" />
               </View>
-              <Text className="text-gray-600 font-medium text-sm">{language === 'zh' ? '暂无课程包' : 'No courses'}</Text>
+              <Text className="text-gray-600 font-medium text-sm">{tr('暂无课程包', 'No courses', 'لا توجد دورات', language)}</Text>
             </View>
           }
         />

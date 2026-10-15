@@ -6,8 +6,14 @@ import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
 
+// 三语言帮助函数（阿拉伯语 RTL 文字）
+function tr(zh: string, en: string, ar: string, language: string): string {
+  if (language === 'ar') return ar;
+  return language === 'zh' ? zh : en;
+}
+
 // 格式化课程日期
-function formatScheduleDate(dateStr: string, language: 'zh' | 'en'): string {
+function formatScheduleDate(dateStr: string, language: 'zh' | 'en' | 'ar'): string {
   const date = new Date(dateStr);
   const month = date.getMonth() + 1;
   const day = date.getDate();
@@ -19,18 +25,24 @@ function formatScheduleDate(dateStr: string, language: 'zh' | 'en'): string {
 }
 
 // 获取星期几（根据日期动态计算）
-function getDayName(dateStr: string, language: 'zh' | 'en'): string {
+function getDayName(dateStr: string, language: 'zh' | 'en' | 'ar'): string {
   const date = new Date(dateStr);
   const zhWeekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
   const enWeekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const arWeekdays = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
   const day = date.getDay();
-  return language === 'zh' ? zhWeekdays[day] : enWeekdays[day];
+  if (language === 'zh') return zhWeekdays[day];
+  if (language === 'ar') return arWeekdays[day];
+  return enWeekdays[day];
 }
 
 // 获取确认类型
-function getConfirmTypeLabel(type: 'coach' | 'student', language: 'zh' | 'en'): string {
+function getConfirmTypeLabel(type: 'coach' | 'student', language: 'zh' | 'en' | 'ar'): string {
   if (language === 'zh') {
     return type === 'coach' ? '教练确认' : '学生确认';
+  }
+  if (language === 'ar') {
+    return type === 'coach' ? 'تأكيد المدرب' : 'تأكيد الطالب';
   }
   return type === 'coach' ? 'Coach Confirm' : 'Student Confirm';
 }
@@ -79,16 +91,16 @@ export default function DashboardScreen() {
       // 如果没有选中的课程计划，提示用户
       if (!selectedSchedule) {
         Alert.alert(
-          language === 'zh' ? '无可确认课程' : 'No Schedule',
-          language === 'zh' ? '当前没有待确认的课程计划' : 'No pending course schedule'
+          tr('无可确认课程', 'No Schedule', 'لا يوجد درس', language),
+          tr('当前没有待确认的课程计划', 'No pending course schedule', 'لا توجد دورة قيد التأكيد', language)
         );
         setSubmitting(false);
         return;
       }
       
       const confirmRole = confirmType === 'coach' 
-        ? (language === 'zh' ? '教练' : 'Coach')
-        : (language === 'zh' ? '学生' : 'Student');
+        ? (language === 'zh' ? '教练' : language === 'ar' ? 'المدرب' : 'Coach')
+        : (language === 'zh' ? '学生' : language === 'ar' ? 'الطالب' : 'Student');
       
       // 调用确认API
       await lessonsApi.confirmSchedule({
@@ -106,20 +118,24 @@ export default function DashboardScreen() {
       fetchStats();
       
       Alert.alert(
-        language === 'zh' ? '确认成功' : 'Confirmed',
+        tr('确认成功', 'Confirmed', 'تم التأكيد', language),
         language === 'zh' 
           ? isCompleted 
             ? `${confirmRole}确认成功，已上课${duration}课时，课时已扣除`
             : `${confirmRole}确认成功，已记录为未上课`
-          : isCompleted
-            ? `${confirmRole} confirmed: ${duration} lesson(s) recorded and deducted`
-            : `${confirmRole} confirmed: Recorded as absent`
+          : language === 'ar'
+            ? isCompleted
+              ? `${confirmRole} تم تسجيل ${duration} درس وخصمها`
+              : `${confirmRole} تم تسجيل الحصة كغائب`
+            : isCompleted
+              ? `${confirmRole} confirmed: ${duration} lesson(s) recorded and deducted`
+              : `${confirmRole} confirmed: Recorded as absent`
       );
     } catch (error) {
       console.error('Failed to confirm lesson:', error);
       Alert.alert(
-        language === 'zh' ? '确认失败' : 'Error',
-        language === 'zh' ? '请重试' : 'Please try again'
+        tr('确认失败', 'Error', 'فشل التأكيد', language),
+        tr('请重试', 'Please try again', 'حاول مرة أخرى', language)
       );
     } finally {
       setSubmitting(false);
@@ -137,7 +153,7 @@ export default function DashboardScreen() {
     return (
       <Screen>
         <View className="flex-1 items-center justify-center">
-          <Text className="text-muted">{language === 'zh' ? '加载中...' : 'Loading...'}</Text>
+          <Text className="text-muted">{tr('加载中...', 'Loading...', 'جار التحميل...', language)}</Text>
         </View>
       </Screen>
     );
@@ -165,7 +181,7 @@ export default function DashboardScreen() {
           >
             <FontAwesome6 name="globe" size={12} color="white" />
             <Text className="text-white text-xs ml-1.5 font-semibold">
-              {language === 'zh' ? 'EN' : '中'}
+              {language === 'zh' ? 'EN' : language === 'ar' ? 'ع' : '中'}
             </Text>
           </TouchableOpacity>
         </View>
@@ -177,10 +193,10 @@ export default function DashboardScreen() {
           </View>
           <View>
             <Text className="text-xl font-bold text-foreground">
-              {language === 'zh' ? '网球课程' : 'Tennis'}
+              {tr('网球课程', 'Tennis', 'التنس', language)}
             </Text>
             <Text className="text-xs text-muted">
-              {language === 'zh' ? '快乐挥拍每一天' : 'Play & Enjoy'}
+              {tr('快乐挥拍每一天', 'Play & Enjoy', 'العب واستمتع', language)}
             </Text>
           </View>
         </View>
@@ -190,7 +206,7 @@ export default function DashboardScreen() {
           <View className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-2xl p-4 shadow-md border border-orange-100">
             <View className="flex-row justify-between items-center mb-3">
               <Text className="text-sm font-semibold text-gray-700">
-                {language === 'zh' ? '剩余课时' : 'Remaining'}
+                {tr('剩余课时', 'Remaining', 'المتبقي', language)}
               </Text>
               <View className="bg-gradient-to-r from-orange-400 to-amber-400 px-2.5 py-0.5 rounded-full">
                 <Text className="text-white font-bold text-xs">{remainingPercent}%</Text>
@@ -220,7 +236,7 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-xl font-bold text-green-600">{stats?.used_lessons || 0}</Text>
                 <Text className="text-xs text-gray-500">
-                  {language === 'zh' ? '已上课时' : 'Used'}
+                  {tr('已上课时', 'Used', 'المستخدمة', language)}
                 </Text>
               </View>
               <View className="w-8" />
@@ -230,7 +246,7 @@ export default function DashboardScreen() {
                 </View>
                 <Text className="text-xl font-bold text-blue-600">{stats?.total_records || 0}</Text>
                 <Text className="text-xs text-gray-500">
-                  {language === 'zh' ? '上课次数' : 'Sessions'}
+                  {tr('上课次数', 'Sessions', 'الجلسات', language)}
                 </Text>
               </View>
             </View>
@@ -245,7 +261,7 @@ export default function DashboardScreen() {
                 <FontAwesome6 name="calendar" size={18} color="white" />
               </View>
               <Text className="text-base font-bold text-white">
-                {language === 'zh' ? '下周课程' : 'Upcoming Lessons'}
+                {tr('下周课程', 'Upcoming Lessons', 'الدروس القادمة', language)}
               </Text>
             </View>
             
@@ -260,7 +276,7 @@ export default function DashboardScreen() {
                         {getDayName(schedule.schedule_date, language)} {formatScheduleDate(schedule.schedule_date, language)} {schedule.schedule_time}
                       </Text>
                       <Text className="text-emerald-300 text-sm font-bold">
-                        ({schedule.duration}{language === 'zh' ? '课时' : 'lessons'})
+                        ({schedule.duration}{tr('课时', 'lessons', 'دروس', language)})
                       </Text>
                     </View>
 
@@ -268,13 +284,13 @@ export default function DashboardScreen() {
                       <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 mr-2">
                         <FontAwesome6 name="user-tie" size={12} color="white" />
                         <Text className="text-white/90 text-xs ml-1.5">
-                          {language === 'zh' ? '教练' : 'Coach'}: {schedule.teacher?.name || 'Hany'}
+                          {tr('教练', 'Coach', 'المدرب', language)}: {schedule.teacher?.name || 'Hany'}
                         </Text>
                       </View>
                       <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 ml-2">
                         <FontAwesome6 name="book" size={12} color="white" />
                         <Text className="text-white/90 text-xs ml-1.5">
-                          {language === 'zh' ? '学生' : 'Student'}: Book
+                          {tr('学生', 'Student', 'الطالب', language)}: Book
                         </Text>
                       </View>
                     </View>
@@ -287,7 +303,7 @@ export default function DashboardScreen() {
                     activeOpacity={0.8}
                   >
                     <Text className="text-white font-bold text-sm">
-                      {language === 'zh' ? `确认 ${getDayName(schedule.schedule_date, language)} 课程` : `Confirm ${getDayName(schedule.schedule_date, language)} Lesson`}
+                      {language === 'zh' ? `确认 ${getDayName(schedule.schedule_date, language)} 课程` : language === 'ar' ? `تأكيد درس ${getDayName(schedule.schedule_date, language)}` : `Confirm ${getDayName(schedule.schedule_date, language)} Lesson`}
                     </Text>
                   </TouchableOpacity>
                   {index < upcomingSchedules.length - 1 && (
@@ -297,7 +313,7 @@ export default function DashboardScreen() {
               ))
             ) : (
               <Text className="text-white/80 text-sm text-center py-2">
-                {language === 'zh' ? '暂无即将开始的课程计划' : 'No upcoming schedules'}
+                {tr('暂无即将开始的课程计划', 'No upcoming schedules', 'لا توجد دروس قادمة', language)}
               </Text>
             )}
           </View>
@@ -324,7 +340,7 @@ export default function DashboardScreen() {
             {/* Modal Header */}
             <View className="flex-row items-center justify-between mb-4">
               <Text className="text-lg font-bold text-gray-900">
-                {language === 'zh' ? '课程确认' : 'Lesson Confirmation'}
+                {tr('课程确认', 'Lesson Confirmation', 'تأكيد الدرس', language)}
               </Text>
               <TouchableOpacity 
                 onPress={() => setConfirmModalVisible(false)}
@@ -339,18 +355,18 @@ export default function DashboardScreen() {
               <Text className="text-sm text-gray-600 mb-1">
                 {selectedSchedule 
                   ? `${getDayName(selectedSchedule.schedule_date, language)} ${formatScheduleDate(selectedSchedule.schedule_date, language)} ${selectedSchedule.schedule_time}`
-                  : (language === 'zh' ? '暂无课程计划' : 'No Schedule')
+                  : tr('暂无课程计划', 'No Schedule', 'لا يوجد جدول', language)
                 }
               </Text>
               <Text className="text-xs text-gray-400">
-                {language === 'zh' ? '教练' : 'Coach'}: {selectedSchedule?.teacher?.name || 'Hany'} | {language === 'zh' ? '学生' : 'Student'}: Book
+                {tr('教练', 'Coach', 'المدرب', language)}: {selectedSchedule?.teacher?.name || 'Hany'} | {tr('学生', 'Student', 'الطالب', language)}: Book
               </Text>
             </View>
 
             {/* Completed Status */}
             <View className="mb-4">
               <Text className="text-sm font-medium text-gray-700 mb-2">
-                {language === 'zh' ? '是否已上课' : 'Attendance'}
+                {tr('是否已上课', 'Attendance', 'الحضور', language)}
               </Text>
               <View className="flex-row">
                 <TouchableOpacity 
@@ -364,7 +380,7 @@ export default function DashboardScreen() {
                   <Text className={`text-sm font-medium ${
                     isCompleted ? 'text-white' : 'text-gray-500'
                   }`}>
-                    {language === 'zh' ? '已上课' : 'Attended'}
+                    {tr('已上课', 'Attended', 'حضر', language)}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
@@ -378,7 +394,7 @@ export default function DashboardScreen() {
                   <Text className={`text-sm font-medium ${
                     !isCompleted ? 'text-white' : 'text-gray-500'
                   }`}>
-                    {language === 'zh' ? '未上课' : 'Absent'}
+                    {tr('未上课', 'Absent', 'غائب', language)}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -387,7 +403,7 @@ export default function DashboardScreen() {
             {/* Duration */}
             <View className="mb-5">
               <Text className="text-sm font-medium text-gray-700 mb-2">
-                {language === 'zh' ? '上课课时' : 'Duration'}
+                {tr('上课课时', 'Duration', 'عدد الدروس', language)}
               </Text>
               <View className="flex-row">
                 <TouchableOpacity 
@@ -401,7 +417,7 @@ export default function DashboardScreen() {
                   <Text className={`text-sm font-medium ${
                     duration === 2 ? 'text-white' : 'text-gray-500'
                   }`}>
-                    2 {language === 'zh' ? '课时' : 'lessons'}
+                    2 {tr('课时', 'lessons', 'دروس', language)}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity 
@@ -415,7 +431,7 @@ export default function DashboardScreen() {
                   <Text className={`text-sm font-medium ${
                     duration === 1 ? 'text-white' : 'text-gray-500'
                   }`}>
-                    1 {language === 'zh' ? '课时' : 'lesson'}
+                    1 {tr('课时', 'lesson', 'درس', language)}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -432,7 +448,7 @@ export default function DashboardScreen() {
                 className="flex-1 py-3 rounded-xl items-center mr-1.5 bg-gradient-to-r from-sky-500 to-blue-600"
               >
                 <Text className="text-white font-bold text-sm">
-                  {language === 'zh' ? '教练确认' : 'Coach'}
+                  {tr('教练确认', 'Coach', 'تأكيد المدرب', language)}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity 
@@ -444,7 +460,7 @@ export default function DashboardScreen() {
                 className="flex-1 py-3 rounded-xl items-center ml-1.5 bg-gradient-to-r from-emerald-400 to-green-600"
               >
                 <Text className="text-white font-bold text-sm">
-                  {language === 'zh' ? '学生确认' : 'Student'}
+                  {tr('学生确认', 'Student', 'تأكيد الطالب', language)}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -453,7 +469,7 @@ export default function DashboardScreen() {
               className="mt-3 py-2.5 rounded-xl items-center bg-gray-100"
             >
               <Text className="text-gray-500 text-sm">
-                {language === 'zh' ? '取消' : 'Cancel'}
+                {tr('取消', 'Cancel', 'إلغاء', language)}
               </Text>
             </TouchableOpacity>
           </TouchableOpacity>
@@ -483,7 +499,7 @@ export default function DashboardScreen() {
                 <FontAwesome6 name="circle-exclamation" size={28} color="#f59e0b" />
               </View>
               <Text className="text-lg font-bold text-gray-900">
-                {language === 'zh' ? '确认上课记录' : 'Confirm Attendance'}
+                {tr('确认上课记录', 'Confirm Attendance', 'تأكيد سجل الدرس', language)}
               </Text>
             </View>
 
@@ -492,7 +508,9 @@ export default function DashboardScreen() {
               <Text className="text-sm text-gray-700 text-center leading-relaxed">
                 {language === 'zh' 
                   ? `确认后，将记录本次上课 ${isCompleted ? duration : 0} 课时，课时将从课程包中扣除。是否确认？`
-                  : `After confirmation, this will record ${isCompleted ? duration : 0} lesson(s) and deduct from your package. Continue?`
+                  : language === 'ar'
+                    ? `بعد التأكيد، سيتم تسجيل ${isCompleted ? duration : 0} درس، وسيتم خصمها من الباقة. هل أنت متأكد؟`
+                    : `After confirmation, this will record ${isCompleted ? duration : 0} lesson(s) and deduct from your package. Continue?`
                 }
               </Text>
             </View>
@@ -506,8 +524,8 @@ export default function DashboardScreen() {
               }`}>
                 <Text className="text-white font-semibold text-sm">
                   {pendingConfirmRole === 'coach' 
-                    ? (language === 'zh' ? '教练确认' : 'Coach Confirm')
-                    : (language === 'zh' ? '学生确认' : 'Student Confirm')
+                    ? (language === 'zh' ? '教练确认' : language === 'ar' ? 'تأكيد المدرب' : 'Coach Confirm')
+                    : (language === 'zh' ? '学生确认' : language === 'ar' ? 'تأكيد الطالب' : 'Student Confirm')
                   }
                 </Text>
               </View>
@@ -529,7 +547,7 @@ export default function DashboardScreen() {
               }`}
             >
               <Text className="text-white font-bold text-sm">
-                {language === 'zh' ? '确认' : 'Confirm'}
+                {tr('确认', 'Confirm', 'تأكيد', language)}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity 
@@ -537,7 +555,7 @@ export default function DashboardScreen() {
               className="py-2.5 rounded-xl items-center bg-gray-100"
             >
               <Text className="text-gray-500 text-sm">
-                {language === 'zh' ? '取消' : 'Cancel'}
+                {tr('取消', 'Cancel', 'إلغاء', language)}
               </Text>
             </TouchableOpacity>
           </TouchableOpacity>

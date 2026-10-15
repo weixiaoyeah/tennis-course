@@ -6,6 +6,12 @@ import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
 
+// 三语言帮助函数（阿拉伯语 RTL 文字）
+function tr(zh: string, en: string, ar: string, language: string): string {
+  if (language === 'ar') return ar;
+  return language === 'zh' ? zh : en;
+}
+
 export default function RecordsScreen() {
   const [records, setRecords] = useState<LessonRecord[]>([]);
   const [courses, setCourses] = useState<CoursePackage[]>([]);
@@ -79,7 +85,7 @@ export default function RecordsScreen() {
             color="white" 
           />
           <Text className="text-white text-xs ml-1 font-semibold">
-            {language === 'zh' ? '未上课' : 'Absent'}
+            {tr('未上课', 'Absent', 'غائب', language)}
           </Text>
         </View>
       );
@@ -97,8 +103,8 @@ export default function RecordsScreen() {
         />
         <Text className="text-white text-xs ml-1 font-semibold">
           {isCoach 
-            ? (language === 'zh' ? '教练确认' : 'Coach') 
-            : (language === 'zh' ? '学生确认' : 'Student')
+            ? (tr('教练确认', 'Coach', 'تأكيد المدرب', language)) 
+            : (tr('学生确认', 'Student', 'تأكيد الطالب', language))
           }
         </Text>
       </View>
@@ -122,20 +128,20 @@ export default function RecordsScreen() {
               </Text>
               {isAbsent ? (
                 <View className="bg-gray-200 px-1.5 py-0.5 rounded">
-                  <Text className="text-gray-500 text-xs">{language === 'zh' ? '未上课' : 'Absent'}</Text>
+                  <Text className="text-gray-500 text-xs">{tr('未上课', 'Absent', 'غائب', language)}</Text>
                 </View>
               ) : (
                 getConfirmBadge(item.confirmed_by)
               )}
             </View>
             <Text className="text-xs text-gray-500 mt-0.5 flex-row items-center">
-              <FontAwesome6 name="user-tie" size={10} color="#9ca3af" /> {language === 'zh' ? '教练' : 'Coach'}: {getTeacherName(item.teacher_id)}
+              <FontAwesome6 name="user-tie" size={10} color="#9ca3af" /> {tr('教练', 'Coach', 'المدرب', language)}: {getTeacherName(item.teacher_id)}
             </Text>
           </View>
         </View>
         <View className={`px-2.5 py-1 rounded-lg ${isAbsent ? 'bg-gray-200' : 'bg-gradient-to-r from-green-400 to-emerald-500'}`}>
           <Text className={`font-bold text-xs ${isAbsent ? 'text-gray-400 line-through' : 'text-white'}`}>
-            {item.duration} {language === 'zh' ? '课时' : 'less'}
+            {item.duration} {tr('课时', 'less', 'درس', language)}
           </Text>
         </View>
       </View>
@@ -164,10 +170,10 @@ export default function RecordsScreen() {
           <View className="bg-gradient-to-br from-green-400 to-emerald-500 rounded-xl p-4 shadow-lg">
             <View className="flex-row justify-between items-center mb-3">
               <Text className="text-white font-bold text-sm">
-                {language === 'zh' ? '课时进度' : 'Progress'}
+                {tr('课时进度', 'Progress', 'تقدم الدروس', language)}
               </Text>
               <Text className="text-white/80 text-xs">
-                {usedLessons}/{totalLessons} {language === 'zh' ? '课时' : 'lessons'}
+                {usedLessons}/{totalLessons} {tr('课时', 'lessons', 'درس', language)}
               </Text>
             </View>
             <View className="bg-white/30 rounded-full h-3 mb-2">
@@ -178,13 +184,13 @@ export default function RecordsScreen() {
             </View>
             <View className="flex-row justify-between items-center">
               <Text className="text-white/90 text-xs">
-                {language === 'zh' ? '已完成' : 'Completed'}: {usedLessons}
+                {tr('已完成', 'Completed', 'مكتمل', language)}: {usedLessons}
               </Text>
               <Text className="text-white font-bold text-lg">
                 {remainingLessons}
               </Text>
               <Text className="text-white/90 text-xs">
-                {language === 'zh' ? '剩余课时' : 'Remaining'}
+                {tr('剩余课时', 'Remaining', 'المتبقي', language)}
               </Text>
             </View>
           </View>
@@ -204,7 +210,7 @@ export default function RecordsScreen() {
               <View className="bg-green-100 p-3 rounded-full mb-2.5">
                 <FontAwesome6 name="clipboard-list" size={28} color="#10b981" />
               </View>
-              <Text className="text-gray-600 font-medium text-sm">{language === 'zh' ? '暂无上课记录' : 'No records'}</Text>
+              <Text className="text-gray-600 font-medium text-sm">{tr('暂无上课记录', 'No records', 'لا توجد سجلات', language)}</Text>
             </View>
           }
         />
