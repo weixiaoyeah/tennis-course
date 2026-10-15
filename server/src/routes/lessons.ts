@@ -14,10 +14,10 @@ function parseLessonDate(lessonDate: string): number {
 
 const router = Router();
 
-// 获取所有上课记录（可按课程包筛选，按上课时间从近到远排序）
+// 获取所有上课记录（可按课程包/教练筛选，按上课时间从近到远排序）
 router.get('/', async (req, res) => {
   try {
-    const { course_package_id } = req.query;
+    const { course_package_id, teacher_id } = req.query;
     const client = getSupabaseClient();
     
     let query = client
@@ -26,6 +26,9 @@ router.get('/', async (req, res) => {
     
     if (course_package_id) {
       query = query.eq('course_package_id', parseInt(course_package_id as string));
+    }
+    if (teacher_id) {
+      query = query.eq('teacher_id', parseInt(teacher_id as string));
     }
     
     const { data, error } = await query;

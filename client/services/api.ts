@@ -173,10 +173,11 @@ export const coursesApi = {
 
 // 上课记录 API
 export const lessonsApi = {
-  getAll: async (course_package_id?: number): Promise<LessonRecord[]> => {
-    const url = course_package_id 
-      ? `${API_BASE}/lessons?course_package_id=${course_package_id}`
-      : `${API_BASE}/lessons`;
+  getAll: async (course_package_id?: number, teacher_id?: number): Promise<LessonRecord[]> => {
+    const params: string[] = [];
+    if (course_package_id) params.push(`course_package_id=${course_package_id}`);
+    if (teacher_id) params.push(`teacher_id=${teacher_id}`);
+    const url = params.length > 0 ? `${API_BASE}/lessons?${params.join('&')}` : `${API_BASE}/lessons`;
     const res = await fetch(url);
     if (!res.ok) throw new Error('获取上课记录失败');
     return res.json();
