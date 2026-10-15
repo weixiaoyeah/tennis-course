@@ -12,3 +12,5 @@ logs/
 node-compile-cache/
 .cozeproj/reduction
 .codegraph
+!backups/README*.md
+!backups/*.json
