@@ -33,9 +33,20 @@ export default function TeachersScreen() {
     try {
       const data = await teachersApi.getAll();
       setTeachers(data);
-      // 清空展开状态和缓存的课程记录
       setExpandedId(null);
-      setLessons({});
+      // 并行拉取每位教练的课程记录，用于卡片头部直接展示统计
+      const lessonsMap: Record<number, LessonRecord[]> = {};
+      await Promise.all(
+        (data || []).map(async (teacher) => {
+          try {
+            const teacherLessons = await lessonsApi.getAll(undefined, teacher.id);
+            lessonsMap[teacher.id] = teacherLessons || [];
+          } catch (e) {
+            lessonsMap[teacher.id] = [];
+          }
+        })
+      );
+      setLessons(lessonsMap);
     } catch (error) {
       console.error('Failed to fetch teachers:', error);
       Toast.show({ type: 'error', text1: t('messages.error') });
@@ -112,11 +123,26 @@ export default function TeachersScreen() {
           </View>
           <View className="flex-1 ml-2.5">
             <Text className="text-base font-bold text-gray-800">{item.name}</Text>
-            {item.phone && (
-              <Text className="text-xs text-gray-500 mt-0.5 flex-row items-center">
-                <FontAwesome6 name="phone" size={10} color="#9ca3af" /> {item.phone}
-              </Text>
-            )}
+            {/* 头部统计信息 */}
+            <View className="flex-row items-center mt-1">
+              <View className="flex-row items-center bg-white/80 rounded-md px-2 py-0.5 mr-1.5">
+                <FontAwesome6 name="calendar-day" size={9} color="#f97316" />
+                <Text className="text-orange-500 text-xs font-semibold ml-1">
+                  {stats.totalCount}
+                </Text>
+              </View>
+              <View className="flex-row items-center bg-white/80 rounded-md px-2 py-0.5">
+                <FontAwesome6 name="clock" size={9} color="#8b5cf6" />
+                <Text className="text-purple-500 text-xs font-semibold ml-1">
+                  {stats.totalDuration}{language === 'zh' ? '课时' : ''}
+                </Text>
+              </View>
+              {item.phone && (
+                <Text className="text-xs text-gray-400 ml-1.5 flex-row items-center">
+                  <FontAwesome6 name="phone" size={9} color="#9ca3af" /> {item.phone}
+                </Text>
+              )}
+            </View>
           </View>
           <View className="w-7 h-7 bg-white/70 rounded-full items-center justify-center">
             <FontAwesome6 
