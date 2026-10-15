@@ -19,14 +19,37 @@
 
   /* Opacity */
   --opacity-disabled: 0.5;
+
+  /* ===== 网球主题色板：将 Tailwind 橙/琥珀色系重映射为 网球蓝 + 草坪绿 + 白 ===== */
+  --color-orange-50:  #eff6ff;   /* 极浅网球蓝 */
+  --color-orange-100: #dbeafe;   /* 浅蓝 */
+  --color-orange-200: #bfdbfe;
+  --color-orange-300: #93c5fd;
+  --color-orange-400: #38bdf8;   /* 明亮网球蓝 */
+  --color-orange-500: #1e88e5;   /* 主网球蓝 */
+  --color-orange-600: #1565c0;
+  --color-orange-700: #0d47a1;
+  --color-orange-800: #0a3d91;
+  --color-orange-900: #08306b;
+
+  --color-amber-50:  #f0fdf4;    /* 极浅草绿 */
+  --color-amber-100: #dcfce7;    /* 浅草绿 */
+  --color-amber-200: #bbf7d0;
+  --color-amber-300: #86efac;
+  --color-amber-400: #4ade80;    /* 明亮草坪绿 */
+  --color-amber-500: #22c55e;    /* 主草坪绿 */
+  --color-amber-600: #16a34a;
+  --color-amber-700: #15803d;
+  --color-amber-800: #166534;
+  --color-amber-900: #14532d;
 }
 
 @layer theme {
   :root {
     @variant light {
-      /* Base Colors - 活泼渐变风 */
-      --background: #fef7f0;
-      --foreground: #2d2d2d;
+      /* Base Colors - 网球主题：白底、蓝主色、草坪绿点缀 */
+      --background: #f8fbff;
+      --foreground: #1e293b;
 
       /* Surface: Used for non-overlay components (cards, accordions, disclosure groups) */
       --surface: #ffffff;
@@ -36,38 +59,38 @@
       --overlay: var(--white);
       --overlay-foreground: var(--foreground);
 
-      --muted: #9ca3af;
+      --muted: #94a3b8;
 
-      --default: #f3f4f6;
-      --default-foreground: #374151;
+      --default: #f1f5f9;
+      --default-foreground: #334155;
 
-      /* 活泼主题色：橙色渐变 */
-      --accent: #f97316;
+      /* 网球主色：球场蓝 */
+      --accent: #1e88e5;
       --accent-foreground: #ffffff;
 
       /* Form Fields */
-      --field-background: #fff7ed;
-      --field-foreground: #374151;
-      --field-placeholder: #9ca3af;
+      --field-background: #eff6ff;
+      --field-foreground: #334155;
+      --field-placeholder: #94a3b8;
       --field-border: transparent;
 
-      /* Status Colors - 活泼配色 */
-      --success: #10b981;
+      /* Status Colors - 草坪绿等 */
+      --success: #22c55e;
       --success-foreground: #ffffff;
 
-      --warning: #f59e0b;
+      --warning: #4ade80;
       --warning-foreground: #ffffff;
 
       --danger: #ef4444;
       --danger-foreground: #ffffff;
 
       /* Component Colors */
-      --segment: #f9fafb;
-      --segment-foreground: #374151;
+      --segment: #f8fafc;
+      --segment-foreground: #334155;
 
       /* Misc Colors */
-      --border: #fed7aa;
-      --separator: #fde68a;
+      --border: #bfdbfe;
+      --separator: #bbf7d0;
       --focus: var(--accent);
       --link: var(--foreground);
 

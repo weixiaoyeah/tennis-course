@@ -173,11 +173,14 @@ export default function DashboardScreen() {
         {/* Header */}
         <View className="px-3 pb-3 flex-row items-center">
           <View className="bg-gradient-to-br from-orange-400 to-amber-400 p-2 rounded-xl mr-2.5">
-            <FontAwesome6 name="table-cells" size={18} color="white" />
+            <FontAwesome6 name="volleyball" size={18} color="white" />
           </View>
           <View>
             <Text className="text-xl font-bold text-foreground">
               {language === 'zh' ? '网球课程' : 'Tennis'}
+            </Text>
+            <Text className="text-xs text-muted">
+              {language === 'zh' ? '快乐挥拍每一天' : 'Play & Enjoy'}
             </Text>
           </View>
         </View>

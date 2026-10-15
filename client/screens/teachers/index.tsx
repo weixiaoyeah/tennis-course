@@ -126,7 +126,7 @@ export default function TeachersScreen() {
             {/* 头部统计信息 */}
             <View className="flex-row items-center mt-1">
               <View className="flex-row items-center bg-white/80 rounded-md px-2 py-0.5 mr-1.5">
-                <FontAwesome6 name="calendar-day" size={9} color="#f97316" />
+                <FontAwesome6 name="calendar-day" size={9} color="#1e88e5" />
                 <Text className="text-orange-500 text-xs font-semibold ml-1">
                   {stats.totalCount}
                 </Text>
@@ -143,7 +143,7 @@ export default function TeachersScreen() {
             <FontAwesome6 
               name={isExpanded ? "chevron-up" : "chevron-down"} 
               size={13} 
-              color="#f97316" 
+              color="#1e88e5" 
             />
           </View>
         </TouchableOpacity>
@@ -243,7 +243,7 @@ export default function TeachersScreen() {
             loading ? null : (
               <View className="items-center pt-20">
                 <View className="bg-orange-100 p-4 rounded-full mb-3">
-                  <FontAwesome6 name="user-tie" size={32} color="#f97316" />
+                  <FontAwesome6 name="user-tie" size={32} color="#1e88e5" />
                 </View>
                 <Text className="text-gray-600 font-medium">{t('teachers.noTeachers')}</Text>
                 <Text className="text-sm text-gray-400 mt-1">
