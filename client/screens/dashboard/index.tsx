@@ -5,6 +5,7 @@ import { statsApi, lessonsApi, type Stats, type CourseSchedule } from '@/service
 import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 // 三语言帮助函数（阿拉伯语 RTL 文字）
 function tr(zh: string, en: string, ar: string, language: string): string {
@@ -58,7 +59,7 @@ export default function DashboardScreen() {
   const [pendingConfirmRole, setPendingConfirmRole] = useState<'coach' | 'student' | null>(null);
   const [secondConfirmVisible, setSecondConfirmVisible] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<CourseSchedule | null>(null);
-  const { t, language, toggleLanguage } = useTranslation();
+  const { language } = useTranslation();
 
   const fetchStats = useCallback(async () => {
     try {
@@ -175,15 +176,7 @@ export default function DashboardScreen() {
       >
         {/* Language Switcher */}
         <View className="px-3 pt-2 flex-row justify-end">
-          <TouchableOpacity 
-            onPress={toggleLanguage}
-            className="bg-gradient-to-r from-orange-400 to-amber-400 px-3 py-1.5 rounded-full flex-row items-center shadow-sm"
-          >
-            <FontAwesome6 name="globe" size={12} color="white" />
-            <Text className="text-white text-xs ml-1.5 font-semibold">
-              {language === 'zh' ? 'EN' : language === 'ar' ? 'ع' : '中'}
-            </Text>
-          </TouchableOpacity>
+          <LanguageSwitcher />
         </View>
 
         {/* Header */}
