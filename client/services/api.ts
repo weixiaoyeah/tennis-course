@@ -1,4 +1,22 @@
-const API_BASE = process.env.EXPO_PUBLIC_BACKEND_BASE_URL + '/api/v1';
+import { Platform } from 'react-native';
+
+// 构建后端 API 基础地址
+// - Web 端 (浏览器/预览): 使用相对路径 /api/v1，自动匹配当前访问域名(经 Metro 代理或网关转发到后端)
+// - 原生 App (Android/iOS): 使用 EXPO_PUBLIC_BACKEND_BASE_URL 指定的绝对地址 (需指向可达后端)
+function resolveApiBase(): string {
+  const envBase = process.env.EXPO_PUBLIC_BACKEND_BASE_URL;
+  // Web 端优先用相对路径，避免 localhost 指向用户本机导致请求失败
+  if (Platform.OS === 'web') {
+    if (envBase && !envBase.startsWith('http://localhost') && !envBase.startsWith('http://127.0.0.1')) {
+      return `${envBase}/api/v1`;
+    }
+    return '/api/v1';
+  }
+  // 原生端必须有可达的绝对地址
+  return `${envBase || ''}/api/v1`;
+}
+
+const API_BASE = resolveApiBase();
 
 export interface Teacher {
   id: number;
