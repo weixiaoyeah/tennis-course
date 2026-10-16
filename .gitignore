@@ -18,3 +18,11 @@ node-compile-cache/
 # 环境变量（敏感，勿提交）
 .env
 *.env
+
+# 密钥/证书（极敏感，严禁提交）
+*.pem
+*.key
+id_rsa
+id_ed25519
+*.p12
+*.keystore
