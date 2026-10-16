@@ -197,8 +197,25 @@ router.post('/confirm-schedule', async (req, res) => {
       confirmedBy: confirmed_by,
       attended: !!is_attended,
     });
+
+    // 生成可转发的「更新日志」文本
+    const attendText = is_attended ? `已上课${newRecord?.duration}课时` : '未上课';
+    const confirmRoleName = confirmed_by === 'coach' ? '教练' : confirmed_by === 'student' ? '学生' : confirmed_by;
+    const teacherName = (newRecord as any)?.teachers?.name || '';
+    const courseName = (newRecord as any)?.course_packages?.name || '';
+    const update_log = [
+      '【网球课程更新日志】',
+      `课程：${courseName}`,
+      `教练：${teacherName}`,
+      `时间：${schedule.schedule_date} ${schedule.schedule_time}`,
+      `课时：${newRecord?.duration} 课时`,
+      `确认人：${confirmRoleName}`,
+      `状态：${attendText}`,
+      `记录人确认时间：${new Date().toLocaleString('zh-CN', { hour12: false })}`,
+      '—— 本消息由网球课程助手自动生成，请知悉。',
+    ].join('\n');
     
-    res.status(201).json(newRecord);
+    res.status(201).json({ ...newRecord, update_log });
   } catch (err: any) {
     res.status(500).json({ error: err.message });
   }

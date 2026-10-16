@@ -4,6 +4,7 @@ import { Screen } from '@/components/Screen';
 import { statsApi, lessonsApi, type Stats, type CourseSchedule } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
 import { FontAwesome6 } from '@expo/vector-icons';
+import * as Clipboard from 'expo-clipboard';
 import { useTranslation } from '@/i18n';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 
@@ -58,6 +59,8 @@ export default function DashboardScreen() {
   const [submitting, setSubmitting] = useState(false);
   const [pendingConfirmRole, setPendingConfirmRole] = useState<'coach' | 'student' | null>(null);
   const [secondConfirmVisible, setSecondConfirmVisible] = useState(false);
+  const [updateLogVisible, setUpdateLogVisible] = useState(false);
+  const [updateLogText, setUpdateLogText] = useState('');
   const [selectedSchedule, setSelectedSchedule] = useState<CourseSchedule | null>(null);
   const { language } = useTranslation();
 
@@ -104,7 +107,7 @@ export default function DashboardScreen() {
         : (language === 'zh' ? '学生' : language === 'ar' ? 'الطالب' : 'Student');
       
       // 调用确认API
-      await lessonsApi.confirmSchedule({
+      const result: any = await lessonsApi.confirmSchedule({
         schedule_id: selectedSchedule.id,
         confirmed_by: confirmType,
         is_attended: isCompleted,
@@ -117,6 +120,13 @@ export default function DashboardScreen() {
       setIsCompleted(true);
       setDuration(2);
       fetchStats();
+
+      // 展示可转发的更新日志
+      if (result?.update_log) {
+        setUpdateLogText(result.update_log);
+        setUpdateLogVisible(true);
+        return;
+      }
       
       Alert.alert(
         tr('确认成功', 'Confirmed', 'تم التأكيد', language),
@@ -553,6 +563,78 @@ export default function DashboardScreen() {
             </TouchableOpacity>
           </TouchableOpacity>
         </TouchableOpacity>
+      </Modal>
+
+      {/* 更新日志弹窗：确认后展示可转发的文本 */}
+      <Modal
+        visible={updateLogVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setUpdateLogVisible(false)}
+      >
+        <View className="flex-1 bg-black/50 justify-center items-center px-4">
+          <View className="bg-white rounded-2xl p-5 w-full max-w-sm">
+            {/* Header */}
+            <View className="flex-row items-center justify-between mb-3">
+              <View className="flex-row items-center">
+                <View className="bg-emerald-100 p-2 rounded-full mr-2">
+                  <FontAwesome6 name="share-nodes" size={16} color="#059669" />
+                </View>
+                <Text className="text-base font-bold text-gray-900">
+                  {tr('更新日志', 'Update Log', 'سجل التحديث', language)}
+                </Text>
+              </View>
+              <TouchableOpacity onPress={() => setUpdateLogVisible(false)}>
+                <FontAwesome6 name="xmark" size={16} color="#9ca3af" />
+              </TouchableOpacity>
+            </View>
+
+            {/* 提示 */}
+            <Text className="text-xs text-gray-500 mb-2">
+              {tr('已生成更新日志，点击按钮复制后转发到群即可：', 'Shareable update generated, copy and forward to your group:', 'تم إنشاء سجل التحديث، انسخه وانشره في المجموعة:', language)}
+            </Text>
+
+            {/* 日志文本 */}
+            <View className="bg-gray-50 rounded-xl p-4 mb-4 max-h-56">
+              <ScrollView>
+                <Text className="text-sm text-gray-800 leading-relaxed">
+                  {updateLogText}
+                </Text>
+              </ScrollView>
+            </View>
+
+            {/* 复制按钮 */}
+            <TouchableOpacity
+              onPress={async () => {
+                try {
+                  await Clipboard.setStringAsync(updateLogText);
+                  Alert.alert(
+                    tr('已复制', 'Copied', 'تم النسخ', language),
+                    tr('日志已复制到剪贴板，可前往微信群粘贴发送。', 'Log copied to clipboard, paste it in your WeChat group.', 'تم نسخ السجل، يمكنك لصقه في مجموعة WeChat.', language)
+                  );
+                } catch (error) {
+                  Alert.alert(tr('复制失败', 'Copy failed', 'فشل النسخ', language), String(error));
+                }
+              }}
+              className="bg-gradient-to-r from-emerald-500 to-green-600 py-3 rounded-xl items-center mb-2"
+            >
+              <View className="flex-row items-center">
+                <FontAwesome6 name="copy" size={14} color="white" />
+                <Text className="text-white font-bold text-sm ml-2">
+                  {tr('复制并转发到群', 'Copy & Forward to Group', 'انسخ وانشر إلى المجموعة', language)}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setUpdateLogVisible(false)}
+              className="py-2.5 rounded-xl items-center bg-gray-100"
+            >
+              <Text className="text-gray-500 text-sm">
+                {tr('关闭', 'Close', 'إغلاق', language)}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
     </Screen>
   );
