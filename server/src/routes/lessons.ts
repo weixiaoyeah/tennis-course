@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { getSupabaseClient } from '../storage/database/supabase-client';
 import { lesson_records, insertLessonRecordSchema } from '../storage/database/shared/schema';
+import { sendConfirmedLesson } from '../utils/wechat-webhook';
 import dayjs from 'dayjs';
 
 // 解析课程时间字符串为可排序的时间戳（格式如 "2026-10-10 10:00-12:00" 或 "2026/5/16 10:00-12:00"）
@@ -185,6 +186,17 @@ router.post('/confirm-schedule', async (req, res) => {
         confirmed_at: new Date().toISOString()
       })
       .eq('id', schedule_id);
+
+    // 同步推送企业微信群机器人通知（未配置 WECHAT_WEBHOOK_URL 时模块内部静默跳过，不影响主流程）
+    await sendConfirmedLesson({
+      teacherName: (newRecord as any)?.teachers?.name,
+      courseName: (newRecord as any)?.course_packages?.name,
+      scheduleDate: schedule.schedule_date,
+      scheduleTime: schedule.schedule_time,
+      duration: newRecord?.duration,
+      confirmedBy: confirmed_by,
+      attended: !!is_attended,
+    });
     
     res.status(201).json(newRecord);
   } catch (err: any) {
