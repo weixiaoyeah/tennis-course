@@ -14,6 +14,52 @@ function tr(zh: string, en: string, ar: string, language: string): string {
   return language === 'zh' ? zh : en;
 }
 
+// 跨平台、跨协议（HTTP/HTTPS）可靠的复制函数
+// 说明：expo-clipboard 在 web 端依赖 navigator.clipboard，而浏览器仅在 HTTPS 或 localhost
+// 下才允许该 API；HTTP 页面会失效。这里做三层降级：
+//   1) 原生端(non-web)：直接走 expo-clipboard
+//   2) web + navigator.clipboard 可用：用 Clipboard API（需 HTTPS）
+//   3) web + 无 Volume API：回退到 textarea + document.execCommand('copy')（HTTP 下也能用）
+async function copyToClipboard(text: string): Promise<boolean> {
+  if (Platform.OS !== 'web') {
+    try {
+      await Clipboard.setStringAsync(text);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  // ---- web ----
+  const win = typeof window !== 'undefined' ? (window as any) : undefined;
+  try {
+    if (win?.navigator?.clipboard && typeof win.navigator.clipboard.writeText === 'function') {
+      await win.navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // 继续降级
+  }
+  // 降级：execCommand('copy')
+  try {
+    const doc = typeof document !== 'undefined' ? (document as any) : undefined;
+    if (!doc) return false;
+    const textarea = doc.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.top = '-9999px';
+    textarea.style.left = '-9999px';
+    textarea.setAttribute('readonly', '');
+    doc.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+    const ok = doc.execCommand('copy');
+    doc.body.removeChild(textarea);
+    return ok;
+  } catch {
+    return false;
+  }
+}
+
 // 格式化课程日期
 function formatScheduleDate(dateStr: string, language: 'zh' | 'en' | 'ar'): string {
   const date = new Date(dateStr);
@@ -61,6 +107,7 @@ export default function DashboardScreen() {
   const [secondConfirmVisible, setSecondConfirmVisible] = useState(false);
   const [updateLogVisible, setUpdateLogVisible] = useState(false);
   const [updateLogText, setUpdateLogText] = useState('');
+  const [copyDone, setCopyDone] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<CourseSchedule | null>(null);
   const { language } = useTranslation();
 
@@ -607,21 +654,32 @@ export default function DashboardScreen() {
             <TouchableOpacity
               onPress={async () => {
                 try {
-                  await Clipboard.setStringAsync(updateLogText);
-                  Alert.alert(
-                    tr('已复制', 'Copied', 'تم النسخ', language),
-                    tr('日志已复制到剪贴板，可前往微信群粘贴发送。', 'Log copied to clipboard, paste it in your WeChat group.', 'تم نسخ السجل، يمكنك لصقه في مجموعة WeChat.', language)
-                  );
+                  const ok = await copyToClipboard(updateLogText);
+                  if (ok) {
+                    setCopyDone(true);
+                    setTimeout(() => setCopyDone(false), 2000);
+                    Alert.alert(
+                      tr('已复制', 'Copied', 'تم النسخ', language),
+                      tr('日志已复制到剪贴板，可前往微信群粘贴发送。', 'Log copied to clipboard, paste it in your WeChat group.', 'تم نسخ السجل، يمكنك لصقه في مجموعة WeChat.', language)
+                    );
+                  } else {
+                    Alert.alert(
+                      tr('复制失败', 'Copy failed', 'فشل النسخ', language),
+                      tr('当前浏览器不允许复制，请长按文字手动复制。', 'Your browser blocks auto-copy. Press and hold the text to copy manually.', 'لا يسمح المتصفح بالنسخ التلقائي، اضغط مطولاً على النص للنسخ.', language)
+                    );
+                  }
                 } catch (error) {
                   Alert.alert(tr('复制失败', 'Copy failed', 'فشل النسخ', language), String(error));
                 }
               }}
-              className="bg-gradient-to-r from-emerald-500 to-green-600 py-3 rounded-xl items-center mb-2"
+              className={`py-3 rounded-xl items-center mb-2 ${copyDone ? 'bg-gradient-to-r from-green-700 to-green-800' : 'bg-gradient-to-r from-emerald-500 to-green-600'}`}
             >
               <View className="flex-row items-center">
-                <FontAwesome6 name="copy" size={14} color="white" />
+                <FontAwesome6 name={copyDone ? 'check' : 'copy'} size={14} color="white" />
                 <Text className="text-white font-bold text-sm ml-2">
-                  {tr('复制并转发到群', 'Copy & Forward to Group', 'انسخ وانشر إلى المجموعة', language)}
+                  {copyDone
+                    ? tr('已复制 ✓', 'Copied ✓', 'تم النسخ ✓', language)
+                    : tr('复制并转发到群', 'Copy & Forward to Group', 'انسخ وانشر إلى المجموعة', language)}
                 </Text>
               </View>
             </TouchableOpacity>
