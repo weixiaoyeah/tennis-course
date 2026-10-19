@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal, Alert, Platform } from 'react-native';
+import { View, Text, ScrollView, RefreshControl, TouchableOpacity, Modal, Alert, Platform, TextInput } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { statsApi, lessonsApi, type Stats, type CourseSchedule } from '@/services/api';
 import { useFocusEffect } from 'expo-router';
@@ -107,6 +107,7 @@ export default function DashboardScreen() {
   const [secondConfirmVisible, setSecondConfirmVisible] = useState(false);
   const [updateLogVisible, setUpdateLogVisible] = useState(false);
   const [updateLogText, setUpdateLogText] = useState('');
+  const [remark, setRemark] = useState('');
   const [copyDone, setCopyDone] = useState(false);
   const [selectedSchedule, setSelectedSchedule] = useState<CourseSchedule | null>(null);
   const { language } = useTranslation();
@@ -158,13 +159,15 @@ export default function DashboardScreen() {
         schedule_id: selectedSchedule.id,
         confirmed_by: confirmType,
         is_attended: isCompleted,
-        duration: duration
+        duration: duration,
+        remark: remark
       });
       
       // 关闭弹窗并刷新数据
       setSecondConfirmVisible(false);
       setConfirmModalVisible(false);
       setIsCompleted(true);
+      setRemark('');
       setDuration(2);
       fetchStats();
 
@@ -485,6 +488,20 @@ export default function DashboardScreen() {
                   </Text>
                 </TouchableOpacity>
               </View>
+            </View>
+
+            {/* 备注输入框 */}
+            <View className="mb-5">
+              <TextInput
+                value={remark}
+                onChangeText={setRemark}
+                placeholder={tr('添加备注，如请假原因、改期安排…（可选）', 'Add a note (e.g. reason, reschedule)… (optional)', 'أضف ملاحظة (مثال: السبب، إعادة الجدولة)… (اختياري)', language)}
+                placeholderTextColor="#9ca3af"
+                multiline
+                numberOfLines={3}
+                className="bg-gray-50 rounded-xl px-4 py-3 text-sm text-gray-800 text-left"
+                style={{ minHeight: 72, textAlignVertical: 'top' }}
+              />
             </View>
 
             {/* Confirm Buttons */}

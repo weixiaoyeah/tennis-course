@@ -123,7 +123,7 @@ router.post('/', async (req, res) => {
 router.post('/confirm-schedule', async (req, res) => {
   try {
     const client = getSupabaseClient();
-    const { schedule_id, confirmed_by, is_attended, duration } = req.body;
+    const { schedule_id, confirmed_by, is_attended, duration, remark } = req.body;
     
     if (!schedule_id) {
       return res.status(400).json({ error: '课程计划ID不能为空' });
@@ -154,7 +154,7 @@ router.post('/confirm-schedule', async (req, res) => {
       teacher_id: schedule.teacher_id,
       lesson_date: schedule.schedule_date.replace(/^\\d{4}-/, '') + ' ' + schedule.schedule_time,
       duration: duration || schedule.duration,
-      remark: schedule.remark || '',
+      remark: remark || schedule.remark || '',
     };
     
     const parseResult = insertLessonRecordSchema.safeParse(lessonRecord);
@@ -203,6 +203,7 @@ router.post('/confirm-schedule', async (req, res) => {
     const confirmRoleName = confirmed_by === 'coach' ? '教练' : confirmed_by === 'student' ? '学生' : confirmed_by;
     const teacherName = (newRecord as any)?.teachers?.name || '';
     const courseName = (newRecord as any)?.course_packages?.name || '';
+    const remarkText = remark || schedule.remark || '';
     const update_log = [
       '【网球课程更新日志】',
       `课程：${courseName}`,
@@ -211,9 +212,10 @@ router.post('/confirm-schedule', async (req, res) => {
       `课时：${newRecord?.duration} 课时`,
       `确认人：${confirmRoleName}`,
       `状态：${attendText}`,
+      remarkText ? `备注：${remarkText}` : null,
       `记录人确认时间：${new Date().toLocaleString('zh-CN', { hour12: false })}`,
       '—— 本消息由网球课程助手自动生成，请知悉。',
-    ].join('\n');
+    ].filter(Boolean).join('\n');
     
     res.status(201).json({ ...newRecord, update_log });
   } catch (err: any) {

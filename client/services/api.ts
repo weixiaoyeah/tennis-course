@@ -222,7 +222,8 @@ export const lessonsApi = {
     schedule_id: number; 
     is_attended: boolean; 
     duration: number; 
-    confirmed_by?: 'coach' | 'student' 
+    confirmed_by?: 'coach' | 'student';
+    remark?: string 
   }): Promise<LessonRecord> => {
     const res = await fetch(`${API_BASE}/lessons/confirm-schedule`, {
       method: 'POST',
