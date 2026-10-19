@@ -243,3 +243,41 @@ export const statsApi = {
     return res.json();
   },
 };
+
+// 巡场小助手 API
+export interface SearchResult {
+  teachers: { id: number; name: string; phone?: string; remark?: string }[];
+  courses: { id: number; name: string; total_lessons: number; teacher_name?: string }[];
+  lessons: { id: number; lesson_date: string; duration: number; remark?: string; teacher_name?: string; course_name?: string; confirmed_by?: string }[];
+}
+
+export interface AssistantRecommendation {
+  teacher_id: number;
+  name: string;
+  phone?: string;
+  total_hours: number;
+  records: number;
+  ratio: number;
+  level: string;
+  reason_hint?: string;
+}
+
+export interface AssistantRecommendations {
+  total_hours: number;
+  total_teachers: number;
+  recommendation: { teacher_id: number; name: string } | null;
+  teachers: AssistantRecommendation[];
+}
+
+export const assistantApi = {
+  search: async (q: string): Promise<SearchResult> => {
+    const res = await fetch(`${API_BASE}/assistant/search?q=${encodeURIComponent(q)}`);
+    if (!res.ok) throw new Error('搜索失败');
+    return res.json();
+  },
+  recommendations: async (): Promise<AssistantRecommendations> => {
+    const res = await fetch(`${API_BASE}/assistant/recommendations`);
+    if (!res.ok) throw new Error('获取教练推荐失败');
+    return res.json();
+  },
+};

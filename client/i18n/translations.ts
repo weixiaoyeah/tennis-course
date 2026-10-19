@@ -5,6 +5,7 @@ export const translations = {
     teachers: { zh: '老师', en: 'Teachers', ar: 'المدربون' },
     courses: { zh: '课程', en: 'Courses', ar: 'الدورات' },
     records: { zh: '记录', en: 'Records', ar: 'السجلات' },
+    assistant: { zh: '助手', en: 'Assistant', ar: 'المساعد' },
   },
 
   // 通用按钮
@@ -86,6 +87,31 @@ export const translations = {
       remark: { zh: '请输入备注', en: 'Enter remark', ar: 'أدخل ملاحظة' },
     },
     lessons: { zh: '课时', en: 'lessons', ar: 'دروس' },
+  },
+
+  // 巡场小助手
+  assistant: {
+    title: { zh: '巡场小助手', en: 'Court Assistant', ar: 'مساعد الملعب' },
+    subtitle: { zh: 'RacketPro 小助手', en: 'RacketPro Assistant', ar: 'مساعد RacketPro' },
+    searchPlaceholder: { zh: '搜索教练、课程、课时记录…', en: 'Search coaches, courses, records…', ar: 'ابحث عن المدربين والدورات والسجلات…' },
+    search: { zh: '搜索', en: 'Search', ar: 'بحث' },
+    noKeyword: { zh: '请输入搜索关键词', en: 'Please enter a keyword', ar: 'الرجاء إدخال كلمة' },
+    noResults: { zh: '未找到相关结果', en: 'No results found', ar: 'لا توجد نتائج' },
+    teachers: { zh: '教练', en: 'Coaches', ar: 'المدربون' },
+    courses: { zh: '课程', en: 'Courses', ar: 'الدورات' },
+    records: { zh: '课时记录', en: 'Lesson Records', ar: 'سجلات الدروس' },
+    results: { zh: '搜索结果', en: 'Search Results', ar: 'نتائج البحث' },
+    recommendTitle: { zh: '智能教练推荐', en: 'Smart Coach Recommendation', ar: 'توصية المدرب الذكية' },
+    recommendDesc: { zh: '基于历史课时训练量自动推荐合适的教练', en: 'Auto-recommended based on lesson volume', ar: 'توصية تلقائية حسب حجم التدريب' },
+    recommended: { zh: '推荐', en: 'Recommended', ar: 'موصى به' },
+    trainingHours: { zh: '训练课时', en: 'Training Hours', ar: 'ساعات التدريب' },
+    lessonCount: { zh: '上课次数', en: 'Sessions', ar: 'عدد الجلسات' },
+    ratio: { zh: '占比', en: 'Share', ar: 'النسبة' },
+    core: { zh: '核心教练', en: 'Core Coach', ar: 'مدرب أساسي' },
+    regular: { zh: '常规教练', en: 'Regular Coach', ar: 'مدرب منتظم' },
+    extra: { zh: '替补教练', en: 'Extra Coach', ar: 'مدرب إضافي' },
+    noRecords: { zh: '暂无教练训练数据', en: 'No training data yet', ar: 'لا توجد بيانات تدريب' },
+    endingSoon: { zh: '课时即将用尽，建议尽快安排', en: 'Lessons almost used up, schedule soon', ar: 'توشك الدروس على النفاد' },
   },
 
   // 表单验证

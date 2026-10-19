@@ -30,6 +30,7 @@ export default function TabLayout() {
 
   const labels = {
     home: t('nav.home'),
+    assistant: t('nav.assistant'),
     teachers: t('nav.teachers'),
     courses: t('nav.courses'),
     records: t('nav.records'),
@@ -50,6 +51,15 @@ export default function TabLayout() {
           title: labels.home,
           tabBarIcon: ({ color }) => (
             <FontAwesome6 name="house" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="assistant"
+        options={{
+          title: labels.assistant,
+          tabBarIcon: ({ color }) => (
+            <FontAwesome6 name="wand-magic-sparkles" size={20} color={color} />
           ),
         }}
       />
