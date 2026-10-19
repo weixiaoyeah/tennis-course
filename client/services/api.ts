@@ -281,3 +281,85 @@ export const assistantApi = {
     return res.json();
   },
 };
+
+// 乐姐日历 API
+export interface CalendarTask {
+  id: number;
+  title: string;
+  description?: string;
+  task_type: 'once' | 'repeat';
+  repeat_type: 'none' | 'daily' | 'weekly' | 'monthly';
+  task_date?: string;
+  start_date?: string;
+  end_date?: string;
+  color?: string;
+  completed?: boolean;
+  created_at: string;
+  // 周期展开后的具体实例日期
+  occur_date?: string;
+}
+
+export interface CalendarTaskInput {
+  title: string;
+  description?: string;
+  task_type: 'once' | 'repeat';
+  repeat_type: 'none' | 'daily' | 'weekly' | 'monthly';
+  task_date?: string;
+  start_date?: string;
+  end_date?: string;
+  color?: string;
+  completed?: boolean;
+}
+
+export const calendarApi = {
+  // 获取某日期范围内的任务（周期任务已展开）
+  getRange: async (from: string, to: string): Promise<CalendarTask[]> => {
+    const res = await fetch(`${API_BASE}/calendar?from=${from}&to=${to}`);
+    if (!res.ok) throw new Error('获取日历任务失败');
+    return res.json();
+  },
+  // 获取所有任务定义（含周期定义）
+  getAll: async (): Promise<CalendarTask[]> => {
+    const res = await fetch(`${API_BASE}/calendar/tasks`);
+    if (!res.ok) throw new Error('获取日历任务失败');
+    return res.json();
+  },
+  create: async (data: CalendarTaskInput): Promise<CalendarTask> => {
+    const res = await fetch(`${API_BASE}/calendar`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error || '创建任务失败');
+    }
+    return res.json();
+  },
+  update: async (id: number, data: CalendarTaskInput): Promise<CalendarTask> => {
+    const res = await fetch(`${API_BASE}/calendar/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, ...data }),
+    });
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error || '更新任务失败');
+    }
+    return res.json();
+  },
+  toggleComplete: async (id: number, completed: boolean): Promise<CalendarTask> => {
+    const res = await fetch(`${API_BASE}/calendar/${id}/complete`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed }),
+    });
+    if (!res.ok) throw new Error('更新任务状态失败');
+    return res.json();
+  },
+  remove: async (id: number): Promise<{ success: boolean }> => {
+    const res = await fetch(`${API_BASE}/calendar/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('删除任务失败');
+    return res.json();
+  },
+};

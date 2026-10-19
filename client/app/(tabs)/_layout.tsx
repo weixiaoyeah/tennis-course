@@ -34,6 +34,7 @@ export default function TabLayout() {
     teachers: t('nav.teachers'),
     courses: t('nav.courses'),
     records: t('nav.records'),
+    calendar: t('nav.calendar'),
   };
 
   return (
@@ -87,6 +88,15 @@ export default function TabLayout() {
           title: labels.records,
           tabBarIcon: ({ color }) => (
             <FontAwesome6 name="clipboard-list" size={20} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: labels.calendar,
+          tabBarIcon: ({ color }) => (
+            <FontAwesome6 name="calendar-days" size={20} color={color} />
           ),
         }}
       />

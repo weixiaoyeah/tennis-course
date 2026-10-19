@@ -6,6 +6,7 @@ export const translations = {
     courses: { zh: '课程', en: 'Courses', ar: 'الدورات' },
     records: { zh: '记录', en: 'Records', ar: 'السجلات' },
     assistant: { zh: '助手', en: 'Assistant', ar: 'المساعد' },
+    calendar: { zh: '日历', en: 'Calendar', ar: 'التقويم' },
   },
 
   // 通用按钮
@@ -127,6 +128,39 @@ export const translations = {
     deleteSuccess: { zh: '删除成功', en: 'Deleted Successfully', ar: 'تم الحذف بنجاح' },
     error: { zh: '操作失败，请重试', en: 'Operation failed, please try again', ar: 'فشلت العملية، حاول مرة أخرى' },
     networkError: { zh: '网络错误', en: 'Network Error', ar: 'خطأ في الشبكة' },
+  },
+
+  // 乐姐日历
+  calendar: {
+    title: { zh: '乐姐日历', en: 'Jie Calendar', ar: 'تقويم جي' },
+    today: { zh: '今天', en: 'Today', ar: 'اليوم' },
+    week: { zh: '本周', en: 'Week', ar: 'الأسبوع' },
+    month: { zh: '本月', en: 'Month', ar: 'الشهر' },
+    newTask: { zh: '新建任务', en: 'New Task', ar: 'مهمة جديدة' },
+    editTask: { zh: '编辑任务', en: 'Edit Task', ar: 'تعديل المهمة' },
+    titleLabel: { zh: '任务标题', en: 'Task Title', ar: 'عنوان المهمة' },
+    titlePlaceholder: { zh: '请输入任务标题', en: 'Enter task title', ar: 'أدخل عنوان المهمة' },
+    descLabel: { zh: '描述', en: 'Description', ar: 'الوصف' },
+    descPlaceholder: { zh: '请输入任务描述（可选）', en: 'Enter description (optional)', ar: 'أدخل الوصف (اختياري)' },
+    colorLabel: { zh: '颜色', en: 'Color', ar: 'اللون' },
+    onceType: { zh: '单次任务', en: 'One-time', ar: 'مرة واحدة' },
+    repeatType: { zh: '周期任务', en: 'Recurring', ar: 'متكرر' },
+    repeatKind: { zh: '重复方式', en: 'Repeat', ar: 'التكرار' },
+    none: { zh: '不重复', en: 'No repeat', ar: 'لا تكرار' },
+    daily: { zh: '每天', en: 'Daily', ar: 'يوميًا' },
+    weekly: { zh: '每周', en: 'Weekly', ar: 'أسبوعيًا' },
+    monthly: { zh: '每月', en: 'Monthly', ar: 'شهريًا' },
+    startDate: { zh: '开始日期', en: 'Start Date', ar: 'تاريخ البدء' },
+    endDate: { zh: '截止日期', en: 'End Date', ar: 'تاريخ الانتهاء' },
+    endDatePlaceholder: { zh: '不填则长期有效', en: 'Leave empty for ongoing', ar: 'اتركه فارغًا إذا استمر' },
+    singleDate: { zh: '日期', en: 'Date', ar: 'التاريخ' },
+    taskType: { zh: '任务类型', en: 'Task Type', ar: 'نوع المهمة' },
+    done: { zh: '完成', en: 'Done', ar: 'تم' },
+    doneLabel: { zh: '已完成', en: 'Completed', ar: 'مكتملة' },
+    noTasks: { zh: '暂无任务', en: 'No tasks', ar: 'لا توجد مهام' },
+    repeatTask: { zh: '周期任务', en: 'Recurring', ar: 'متكرر' },
+    deleteConfirm: { zh: '确定删除该任务吗？', en: 'Delete this task?', ar: 'حذف هذه المهمة؟' },
+    saveSuccess: { zh: '保存成功', en: 'Saved', ar: 'تم الحفظ' },
   },
 } as const;
 

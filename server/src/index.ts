@@ -5,6 +5,7 @@ import coursesRouter from './routes/courses';
 import lessonsRouter from './routes/lessons';
 import statsRouter from './routes/stats';
 import assistantRouter from './routes/assistant';
+import calendarRouter from './routes/calendar';
 
 const app = express();
 const port: number = Number(process.env.PORT) || 9091;
@@ -30,6 +31,7 @@ app.use('/api/v1/courses', coursesRouter);
 app.use('/api/v1/lessons', lessonsRouter);
 app.use('/api/v1/stats', statsRouter);
 app.use('/api/v1/assistant', assistantRouter);
+app.use('/api/v1/calendar', calendarRouter);
 
 app.listen(port, '0.0.0.0', () => {
   console.log(`Server listening at http://0.0.0.0:${port}/`);
