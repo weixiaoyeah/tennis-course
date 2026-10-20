@@ -15,7 +15,8 @@ import {
 } from 'react-native';
 import { Screen } from '@/components/Screen';
 import { calendarApi, type CalendarTask } from '@/services/api';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, usePathname } from 'expo-router';
+import { useSafeRouter } from '@/hooks/useSafeRouter';
 import Toast from 'react-native-toast-message';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useTranslation } from '@/i18n';
@@ -64,6 +65,9 @@ const COLORS = ['#4F46E5', '#EA580C', '#059669', '#F43F5E', '#0EA5E9', '#7C3AED'
 
 export default function CalendarScreen() {
   const { t, language } = useTranslation();
+  const pathname = usePathname();
+  const router = useSafeRouter();
+  const isStandalone = pathname.startsWith('/lejie');
   type ViewMode = 'day' | 'week' | 'month';
   const [viewMode, setViewMode] = useState<ViewMode>('day');
   const [anchor, setAnchor] = useState<Date>(new Date()); // 当前锚点日期
@@ -358,6 +362,25 @@ export default function CalendarScreen() {
   return (
     <Screen>
       <View className="flex-1">
+        {/* 独立深路径顶部栏 */}
+        {isStandalone && (
+          <View className="px-3 pt-3 pb-2 flex-row items-center bg-white border-b border-gray-100">
+            <TouchableOpacity
+              className="w-9 h-9 rounded-full bg-gray-100 items-center justify-center mr-2.5"
+              onPress={() => router.navigate('/')}
+            >
+              <FontAwesome6 name="arrow-left" size={15} color="#4B5563" />
+            </TouchableOpacity>
+            <View className="bg-gradient-to-br from-rose-400 to-pink-500 p-2 rounded-xl mr-2.5">
+              <FontAwesome6 name="calendar-days" size={16} color="white" />
+            </View>
+            <View className="flex-1">
+              <Text className="text-base font-bold text-gray-800">乐姐日历</Text>
+              <Text className="text-xs text-gray-400">Jiejie Daily Task · 每日任务</Text>
+            </View>
+          </View>
+        )}
+
         {/* Header */}
         <View className="px-3 pt-2 pb-1.5 flex-row items-center">
           <View className="bg-gradient-to-br from-indigo-400 to-violet-400 p-2 rounded-xl mr-2.5">

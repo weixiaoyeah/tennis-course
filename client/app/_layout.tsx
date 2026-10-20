@@ -22,6 +22,7 @@ export default function RootLayout() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ title: "" }} />
+        <Stack.Screen name="lejie" options={{ title: "乐姐日历", headerShown: false }} />
       </Stack>
       <Toast />
     </Provider>

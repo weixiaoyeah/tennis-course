@@ -1,10 +1,22 @@
 import { Router } from 'express';
+import rateLimit from 'express-rate-limit';
 import { getSupabaseClient } from '../storage/database/supabase-client';
 import { z } from 'zod';
 
 const router = Router();
 
 // ============ 乐姐每日任务日历 ============
+
+// 轻量防黑产爬取/滥用限流：限制每 IP 访问频率
+const calendarLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 分钟窗口
+  max: 60,             // 每 IP 每分钟最多 60 次请求（含读+写）
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: '请求过于频繁，请稍后再试' },
+});
+
+router.use(calendarLimiter);
 
 // 解析 'YYYY-MM-DD' 为日期，非法返回 null
 function parseDate(s?: string | null): Date | null {
