@@ -323,9 +323,9 @@ export default function DashboardScreen() {
               </Text>
             </View>
 
-            {/* 未来一周课程（优先展示） */}
+            {/* 未来一周课程（优先展示，含已确认/缺席只读展示） */}
             {futureSchedules.length > 0 ? (
-              futureSchedules.map((schedule, index) => (
+              futureSchedules.map((schedule) => (
                 <View key={schedule.id}>
                   {/* Schedule Item */}
                   <View className="bg-white/15 rounded-xl p-3 mb-2">
@@ -352,6 +352,35 @@ export default function DashboardScreen() {
                         </Text>
                       </View>
                     </View>
+
+                    {/* 状态标注 */}
+                    {schedule.status === 'confirmed' && (
+                      <View className="flex-row items-center bg-green-500/30 px-2.5 py-1.5 rounded-lg mt-2">
+                        <FontAwesome6 name="circle-check" size={13} color="#86efac" />
+                        <Text className="text-green-200 text-xs font-bold ml-1.5">
+                          {tr('已确认', 'Confirmed', 'تم التأكيد', language)}
+                        </Text>
+                      </View>
+                    )}
+                    {schedule.status === 'absent' && (
+                      <View className="flex-row items-center bg-red-400/30 px-2.5 py-1.5 rounded-lg mt-2">
+                        <FontAwesome6 name="calendar-xmark" size={13} color="#fca5a5" />
+                        <Text className="text-red-200 text-xs font-bold ml-1.5">
+                          {tr('已缺席', 'Absent', 'غائب', language)}
+                        </Text>
+                      </View>
+                    )}
+                    {schedule.status === 'pending' && (
+                      <TouchableOpacity
+                        onPress={() => openConfirmModal(schedule)}
+                        className="bg-white/25 py-2.5 rounded-xl items-center mt-2"
+                        activeOpacity={0.8}
+                      >
+                        <Text className="text-white font-bold text-sm">
+                          {language === 'zh' ? `确认 ${getDayName(schedule.schedule_date, language)} 课程` : language === 'ar' ? `تأكيد درس ${getDayName(schedule.schedule_date, language)}` : `Confirm ${getDayName(schedule.schedule_date, language)} Lesson`}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 </View>
               ))

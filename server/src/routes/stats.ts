@@ -37,33 +37,39 @@ router.get('/', async (req, res) => {
       return res.status(500).json({ error: teachersError.message });
     }
     
-    // 获取所有待确认课程计划（pending）：
-    // - 未来7天内（含今天）：优先展示，按日期升序
-    // - 过期仍未确认（日期 < 今天但状态仍为 pending）：并列展示在后，方便补确认
+    // 获取首页"下周课程"排课：
+    // 1) 未来7天内（含今天）：所有状态的排课都要展示（未确认 pending 可确认，已确认/缺席只读展示）
+    // 2) 过期仍未确认（日期 < 今天但状态仍为 pending）：并列展示在后，方便补确认
     const today = dayjs().format('YYYY-MM-DD');
     const weekEnd = dayjs().add(7, 'day').format('YYYY-MM-DD');
 
-    let scheduleQuery = client
+    // 未来7天：所有状态（pending/confirmed/absent），按日期升序
+    const { data: weekSchedules, error: weekError } = await client
       .from('course_schedules')
       .select('*')
-      .eq('status', 'pending');
+      .gte('schedule_date', today)
+      .lte('schedule_date', weekEnd)
+      .order('schedule_date', { ascending: true });
 
-    const { data: allPendingSchedules, error: scheduleError } = await scheduleQuery;
-
-    if (scheduleError) {
-      console.error('Error fetching upcoming schedules:', scheduleError);
+    if (weekError) {
+      console.error('Error fetching week schedules:', weekError);
     }
 
-    const pendingSchedules = (allPendingSchedules || []).filter(
-      (s: any) => s.schedule_date && s.schedule_date >= today && s.schedule_date <= weekEnd
-    );
-    const overdueSchedules = (allPendingSchedules || []).filter(
-      (s: any) => s.schedule_date && s.schedule_date < today
-    );
+    // 过期未确认：日期 < 今天且状态为 pending，按日期升序
+    const { data: overdueRaw, error: overdueError } = await client
+      .from('course_schedules')
+      .select('*')
+      .eq('status', 'pending')
+      .lt('schedule_date', today)
+      .order('schedule_date', { ascending: true });
 
-    // 未来一周在前（按日期升序），过期未确认课程跟在后面（按日期升序）
-    const future = [...pendingSchedules].sort((a: any, b: any) => a.schedule_date.localeCompare(b.schedule_date));
-    const overdue = [...overdueSchedules].sort((a: any, b: any) => a.schedule_date.localeCompare(b.schedule_date));
+    if (overdueError) {
+      console.error('Error fetching overdue schedules:', overdueError);
+    }
+
+    const future = (weekSchedules || []) as any[];
+    const overdue = (overdueRaw || []) as any[];
+    // 未来7天在前（所有状态），过期未确认课程跟在后面（仅 pending）
     const nextSchedules = [...future, ...overdue];
 
     const nextSchedule = nextSchedules || [];
