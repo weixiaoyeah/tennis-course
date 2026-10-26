@@ -226,6 +226,11 @@ export default function DashboardScreen() {
 
   const upcomingSchedules = stats?.upcoming_schedules || [];
 
+  // 拆分：未来7天（今日含）优先，过期未确认课程在后（后端已按此排序）
+  const _today = new Date().toISOString().slice(0, 10);
+  const futureSchedules = upcomingSchedules.filter(s => s.schedule_date >= _today);
+  const overdueSchedules = upcomingSchedules.filter(s => s.schedule_date < _today);
+
   return (
     <Screen>
       <ScrollView
@@ -317,10 +322,10 @@ export default function DashboardScreen() {
                 {tr('下周课程', 'Upcoming Lessons', 'الدروس القادمة', language)}
               </Text>
             </View>
-            
-            {/* Upcoming schedules list */}
-            {upcomingSchedules.length > 0 ? (
-              upcomingSchedules.map((schedule, index) => (
+
+            {/* 未来一周课程（优先展示） */}
+            {futureSchedules.length > 0 ? (
+              futureSchedules.map((schedule, index) => (
                 <View key={schedule.id}>
                   {/* Schedule Item */}
                   <View className="bg-white/15 rounded-xl p-3 mb-2">
@@ -348,26 +353,66 @@ export default function DashboardScreen() {
                       </View>
                     </View>
                   </View>
-
-                  {/* Confirm Button (only on last item, or per item) */}
-                  <TouchableOpacity 
-                    onPress={() => openConfirmModal(schedule)}
-                    className="bg-white/25 py-2.5 rounded-xl items-center mb-2.5"
-                    activeOpacity={0.8}
-                  >
-                    <Text className="text-white font-bold text-sm">
-                      {language === 'zh' ? `确认 ${getDayName(schedule.schedule_date, language)} 课程` : language === 'ar' ? `تأكيد درس ${getDayName(schedule.schedule_date, language)}` : `Confirm ${getDayName(schedule.schedule_date, language)} Lesson`}
-                    </Text>
-                  </TouchableOpacity>
-                  {index < upcomingSchedules.length - 1 && (
-                    <View className="h-px bg-white/20 my-2" />
-                  )}
                 </View>
               ))
             ) : (
               <Text className="text-white/80 text-sm text-center py-2">
-                {tr('暂无即将开始的课程计划', 'No upcoming schedules', 'لا توجد دروس قادمة', language)}
+                {tr('暂无未来7天课程计划', 'No upcoming schedules in 7 days', 'لا توجد دروس قادمة في 7 أيام', language)}
               </Text>
+            )}
+
+            {/* 过期未确认课程（补确认区域） */}
+            {overdueSchedules.length > 0 && (
+              <View className="mt-3">
+                <View className="flex-row items-center mt-3 mb-2">
+                  <View className="bg-amber-400 p-2 rounded-lg mr-2.5">
+                    <FontAwesome6 name="triangle-exclamation" size={16} color="white" />
+                  </View>
+                  <Text className="text-white text-base font-bold">
+                    {tr('待补确认课程', 'Overdue to Confirm', 'دروس متأخرة للتأكيد', language)}
+                  </Text>
+                </View>
+                <View className="h-px bg-white/30 my-2" />
+                {overdueSchedules.map((schedule) => (
+                  <View key={schedule.id} className="mb-2">
+                    <View className="bg-amber-400/30 border border-amber-300/50 rounded-xl p-3">
+                      <View className="flex-row justify-between items-center mb-1">
+                        <Text className="text-white text-base font-bold">
+                          {getDayName(schedule.schedule_date, language)} {formatScheduleDate(schedule.schedule_date, language)} {schedule.schedule_time}
+                        </Text>
+                        <Text className="text-amber-300 text-sm font-bold">
+                          ({schedule.duration}{tr('课时', 'lessons', 'دروس', language)})
+                        </Text>
+                      </View>
+
+                      <View className="flex-row justify-between mb-2">
+                        <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 mr-2">
+                          <FontAwesome6 name="user-tie" size={12} color="white" />
+                          <Text className="text-white/90 text-xs ml-1.5">
+                            {tr('教练', 'Coach', 'المدرب', language)}: {schedule.teacher?.name || 'Hany'}
+                          </Text>
+                        </View>
+                        <View className="flex-row items-center bg-white/15 px-2.5 py-1.5 rounded-lg flex-1 ml-2">
+                          <FontAwesome6 name="book" size={12} color="white" />
+                          <Text className="text-white/90 text-xs ml-1.5">
+                            {tr('学生', 'Student', 'الطالب', language)}: Book
+                          </Text>
+                        </View>
+                      </View>
+
+                      <TouchableOpacity
+                        onPress={() => openConfirmModal(schedule)}
+                        className="bg-white/25 py-2.5 rounded-xl items-center"
+                        activeOpacity={0.8}
+                      >
+                        <Text className="text-white font-bold text-sm">
+                          {language === 'zh' ? `补确认 ${getDayName(schedule.schedule_date, language)} 课程` : language === 'ar' ? `تأكيد درس ${getDayName(schedule.schedule_date, language)}` : `Confirm ${getDayName(schedule.schedule_date, language)} Lesson`}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                ))}
+              </View>
             )}
           </View>
         </View>
