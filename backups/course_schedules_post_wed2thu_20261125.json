@@ -1,0 +1,24 @@
+{
+  "note": "变更结果：2026-11-25 起，未来每周三课程(teacher_id=4, 17:00-19:00)已改为周四同时段。本周课程(11-25周三/11-28周六)与历史记录不变。新建排课模式：每周四(mou 17:00) + 每周六(hany 10:00)。",
+  "run_date": "2026-11-25",
+  "after": [
+    {"id": 52, "schedule_date": "2026-12-03", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 53, "schedule_date": "2026-12-10", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 54, "schedule_date": "2026-12-17", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 55, "schedule_date": "2026-12-24", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 56, "schedule_date": "2026-12-31", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 57, "schedule_date": "2027-01-07", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 58, "schedule_date": "2027-01-14", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 59, "schedule_date": "2027-01-21", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 60, "schedule_date": "2027-01-28", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 61, "schedule_date": "2027-02-04", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 62, "schedule_date": "2027-02-11", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 63, "schedule_date": "2027-02-18", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 64, "schedule_date": "2027-02-25", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 65, "schedule_date": "2027-03-04", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 66, "schedule_date": "2027-03-11", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 67, "schedule_date": "2027-03-18", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 68, "schedule_date": "2027-03-25", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"},
+    {"id": 69, "schedule_date": "2027-04-01", "schedule_time": "17:00-19:00", "teacher_id": 4, "status": "pending"}
+  ]
+}
