@@ -239,11 +239,12 @@ router.get('/:id/stats', async (req, res) => {
       return res.status(404).json({ error: '课程包不存在' });
     }
     
-    // 获取已上课时总数
+    // 获取已上课时总数（仅统计已确认记录：coach/student，口径与首页 stats 一致）
     const { data: records, error: recordsError } = await client
       .from('lesson_records')
       .select('duration')
-      .eq('course_package_id', parseInt(id));
+      .eq('course_package_id', parseInt(id))
+      .or('confirmed_by.eq.coach,confirmed_by.eq.student');
     
     if (recordsError) {
       return res.status(500).json({ error: recordsError.message });

@@ -155,15 +155,15 @@ export default function CoursesScreen() {
           </TouchableOpacity>
         </View>
 
-        <View className="flex-row items-center mt-2.5 gap-2">
+        <View className="flex-row flex-wrap items-center mt-2.5 gap-2">
           <View className="bg-white/70 px-2.5 py-1 rounded-lg flex-row items-center">
             <FontAwesome6 name="user-tie" size={10} color="#1e88e5" />
             <Text className="text-xs text-sky-600 font-medium ml-1.5">{getTeacherName(item.teacher_id)}</Text>
           </View>
           {item.start_date && (
-            <View className="bg-white/70 px-2.5 py-1 rounded-lg flex-row items-center">
+            <View className="bg-white/70 px-2.5 py-1 rounded-lg flex-row items-center max-w-full">
               <FontAwesome6 name="calendar-days" size={10} color="#1e88e5" />
-              <Text className="text-xs text-sky-600 font-medium ml-1.5">
+              <Text className="text-xs text-sky-600 font-medium ml-1.5 flex-1">
                 {tr('有效期', 'Valid', 'صالح', language)} {item.start_date} - 2027.4.1
               </Text>
             </View>
