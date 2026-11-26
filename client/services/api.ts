@@ -31,10 +31,20 @@ export interface CoursePackage {
   id: number;
   name: string;
   total_lessons: number;
+  bonus_lessons?: number | string;
+  effective_total_lessons?: number;
   teacher_id?: number;
   start_date?: string;
   created_at: string;
   teachers?: { name: string; phone?: string };
+}
+
+export interface CoursePackageAdjustment {
+  id: number;
+  course_package_id: number;
+  change_amount: number | string;
+  reason?: string;
+  created_at: string;
 }
 
 export interface LessonRecord {
@@ -141,6 +151,36 @@ export const coursesApi = {
   getStats: async (id: number): Promise<CoursePackageStats> => {
     const res = await fetch(`${API_BASE}/courses/${id}/stats`);
     if (!res.ok) throw new Error('获取课程统计失败');
+    return res.json();
+  },
+
+  /**
+   * 服务端文件：server/src/routes/courses.ts
+   * 接口：GET /api/v1/courses/:id/adjustments
+   * Path 参数：id: number
+   */
+  getAdjustments: async (id: number): Promise<CoursePackageAdjustment[]> => {
+    const res = await fetch(`${API_BASE}/courses/${id}/adjustments`);
+    if (!res.ok) throw new Error('获取课时调整记录失败');
+    return res.json();
+  },
+
+  /**
+   * 服务端文件：server/src/routes/courses.ts
+   * 接口：POST /api/v1/courses/:id/adjustments
+   * Path 参数：id: number
+   * Body 参数：change_amount: number, reason?: string
+   */
+  addAdjustment: async (id: number, data: { change_amount: number; reason?: string }): Promise<{ adjustment: CoursePackageAdjustment; course_package: CoursePackage }> => {
+    const res = await fetch(`${API_BASE}/courses/${id}/adjustments`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      throw new Error(body?.error || '记录课时调整失败');
+    }
     return res.json();
   },
   

@@ -75,7 +75,8 @@ router.get('/', async (req, res) => {
     const nextSchedule = nextSchedules || [];
     
     // 计算统计 - 只计算有confirmed_by的记录（已确认的上课）
-    const totalLessons = packages?.reduce((sum: number, p: { total_lessons?: number }) => sum + (p.total_lessons || 0), 0) || 0;
+    // 实际总课时 = total_lessons + bonus_lessons（赠送/调整课时）
+    const totalLessons = packages?.reduce((sum: number, p: { total_lessons?: number; bonus_lessons?: any }) => sum + (p.total_lessons || 0) + Number(p.bonus_lessons || 0), 0) || 0;
     const usedLessons = records?.reduce((sum: number, r: { duration?: number }) => sum + (r.duration || 0), 0) || 0;
     const remainingLessons = totalLessons - usedLessons;
     
@@ -86,15 +87,19 @@ router.get('/', async (req, res) => {
     }));
     
     // 各课程包统计
-    const packageStats = (packages || []).map((pkg: { id: number; name: string; total_lessons: number; teacher_id?: number }) => {
+    const packageStats = (packages || []).map((pkg: { id: number; name: string; total_lessons: number; bonus_lessons?: any; teacher_id?: number }) => {
       const pkgRecords = records?.filter((r: { course_package_id?: number }) => r.course_package_id === pkg.id) || [];
       const used = pkgRecords.reduce((sum: number, r: { duration?: number }) => sum + (r.duration || 0), 0);
+      const bonusLessons = Number(pkg.bonus_lessons || 0);
+      const effectiveTotal = (pkg.total_lessons || 0) + bonusLessons;
       return {
         id: pkg.id,
         name: pkg.name,
-        total_lessons: pkg.total_lessons,
+        total_lessons: effectiveTotal,
+        base_total_lessons: pkg.total_lessons,
+        bonus_lessons: bonusLessons,
         used_lessons: used,
-        remaining_lessons: pkg.total_lessons - used,
+        remaining_lessons: effectiveTotal - used,
         teachers: teachers?.find((t: { id: number }) => t.id === pkg.teacher_id),
       };
     });

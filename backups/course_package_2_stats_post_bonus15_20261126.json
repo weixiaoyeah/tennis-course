@@ -1,0 +1,12 @@
+{
+    "id": 2,
+    "name": "2026\u5e74\u5ea6\u8bfe\u7a0b",
+    "total_lessons": 96,
+    "teacher_id": 2,
+    "start_date": "2026-04-01",
+    "created_at": "2026-05-20T16:28:39.338153+08:00",
+    "bonus_lessons": 1.5,
+    "effective_total_lessons": 97.5,
+    "used_lessons": 73,
+    "remaining_lessons": 24.5
+}

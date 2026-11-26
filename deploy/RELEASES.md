@@ -14,6 +14,18 @@
 
 ## 发布历史
 
+### 2026-11-26 · 功能【年度课程课时调整】本地开发中（待用户确认后同步线上）
+- **代码**：本地未发布（等待确认）
+- **功能**：
+  - 课程包新增 `bonus_lessons`（赠送/调整课时，支持小数）；有效总课时 = `total_lessons + bonus_lessons`
+  - 新增课时调整记录（`course_package_adjustments` 表），记录每次总课时变更（数额 + 原因 + 时间）
+  - 课程页面课时数可点击，弹出「课时调整」弹窗：查看调整历史 + 新增课时变更
+  - 首页/课程页统计使用有效总课时
+- **数据**：2026年度课程（id=2）赠送 1.5 课时 → `bonus_lessons=1.5`，有效总课时 96 → 97.5，已用 73，剩余 24.5
+- **接口**：`GET/POST /api/v1/courses/:id/adjustments`、`GET /api/v1/courses/:id/stats` 返回有效总课时
+- **备份**：`backups/course_package_2_adjustments_post_bonus15_20261126.json`、`backups/course_package_2_stats_post_bonus15_20261126.json`
+- **状态**：本地已完成，待确认后同步线上
+
 ### 2026-11-25 · 数据调整【周三课程改为周四同时段】
 - **代码**：无代码变更（仅数据）
 - **数据**：未来每周三课程（mou 教练，17:00-19:00）全部改为周四同时段
